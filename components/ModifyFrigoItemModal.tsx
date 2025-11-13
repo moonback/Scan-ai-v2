@@ -19,31 +19,56 @@ const categories: FrigoCategory[] = [
   'Autre'
 ];
 
+const STORES = [
+  'Carrefour',
+  'Auchan',
+  'Leclerc',
+  'Intermarché',
+  'Casino',
+  'Monoprix',
+  'Franprix',
+  'Lidl',
+  'Aldi',
+  'Super U',
+  'Hyper U',
+  'Cora',
+  'Match',
+  'G20',
+  'Autre'
+];
+
 const ModifyFrigoItemModal: React.FC<ModifyFrigoItemModalProps> = ({ item, onClose, onConfirm }) => {
   const [quantity, setQuantity] = useState(item.quantity || 1);
   const [category, setCategory] = useState<FrigoCategory>(item.category || 'Autre');
   const [dlc, setDlc] = useState(item.dlc || '');
   const [showDlc, setShowDlc] = useState(!!item.dlc);
   const [price, setPrice] = useState(item.price?.toString() || '');
-  const [store, setStore] = useState(item.store || '');
+  
+  // Déterminer si le magasin existant est dans la liste ou est personnalisé
+  const isStoreInList = item.store && STORES.includes(item.store);
+  const [store, setStore] = useState(isStoreInList ? item.store! : (item.store ? 'Autre' : ''));
+  const [customStore, setCustomStore] = useState(isStoreInList ? '' : (item.store || ''));
+  
   const [hasChanges, setHasChanges] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const priceValue = price ? parseFloat(price) : undefined;
-    onConfirm(quantity, category, showDlc && dlc ? dlc : undefined, priceValue, store || undefined);
+    const finalStore = store === 'Autre' ? customStore : store;
+    onConfirm(quantity, category, showDlc && dlc ? dlc : undefined, priceValue, finalStore || undefined);
   };
 
   // Détecter les changements
   React.useEffect(() => {
+    const finalStore = store === 'Autre' ? customStore : store;
     const changed = 
       quantity !== (item.quantity || 1) ||
       category !== (item.category || 'Autre') ||
       (showDlc ? dlc : undefined) !== item.dlc ||
       (price ? parseFloat(price) : undefined) !== item.price ||
-      (store || undefined) !== item.store;
+      (finalStore || undefined) !== item.store;
     setHasChanges(changed);
-  }, [quantity, category, dlc, showDlc, price, store, item]);
+  }, [quantity, category, dlc, showDlc, price, store, customStore, item]);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -234,13 +259,34 @@ const ModifyFrigoItemModal: React.FC<ModifyFrigoItemModalProps> = ({ item, onClo
               </svg>
               Magasin
             </label>
-            <input
-              type="text"
-              value={store}
-              onChange={(e) => setStore(e.target.value)}
-              placeholder="Ex: Carrefour, Auchan..."
-              className="w-full glass-input text-white py-3 px-4 rounded-xl focus:ring-2 focus:ring-cyan-400/50 transition-all text-sm min-h-[48px] placeholder-gray-500"
-            />
+            <div className="relative">
+              <select
+                value={store}
+                onChange={(e) => setStore(e.target.value)}
+                className="w-full glass-input text-white py-3 px-4 pr-10 rounded-xl focus:ring-2 focus:ring-cyan-400/50 transition-all text-sm appearance-none min-h-[48px]"
+              >
+                <option value="" className="bg-gray-800 text-gray-400">Sélectionner un magasin</option>
+                {STORES.map((storeName) => (
+                  <option key={storeName} value={storeName} className="bg-gray-800 text-white">
+                    {storeName}
+                  </option>
+                ))}
+              </select>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+            {store === 'Autre' && (
+              <div className="mt-2 animate-slide-up">
+                <input
+                  type="text"
+                  value={customStore}
+                  onChange={(e) => setCustomStore(e.target.value)}
+                  placeholder="Entrez le nom du magasin"
+                  className="w-full glass-input text-white py-3 px-4 rounded-xl focus:ring-2 focus:ring-cyan-400/50 transition-all text-sm min-h-[48px] placeholder-gray-500"
+                />
+              </div>
+            )}
           </div>
 
           {/* Indicator de changements */}

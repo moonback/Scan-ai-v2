@@ -20,6 +20,24 @@ const CATEGORIES: FrigoCategory[] = [
   'Autre'
 ];
 
+const STORES = [
+  'Carrefour',
+  'Auchan',
+  'Leclerc',
+  'Intermarché',
+  'Casino',
+  'Monoprix',
+  'Franprix',
+  'Lidl',
+  'Aldi',
+  'Super U',
+  'Hyper U',
+  'Cora',
+  'Match',
+  'G20',
+  'Autre'
+];
+
 const AddToFrigoModal: React.FC<AddToFrigoModalProps> = ({ product, onClose, onConfirm }) => {
   const [quantity, setQuantity] = useState(1);
   const [category, setCategory] = useState<FrigoCategory>('Autre');
@@ -27,11 +45,13 @@ const AddToFrigoModal: React.FC<AddToFrigoModalProps> = ({ product, onClose, onC
   const [showDlc, setShowDlc] = useState(false);
   const [price, setPrice] = useState('');
   const [store, setStore] = useState('');
+  const [customStore, setCustomStore] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const priceValue = price ? parseFloat(price) : undefined;
-    onConfirm(quantity, category, showDlc && dlc ? dlc : undefined, priceValue, store || undefined);
+    const finalStore = store === 'Autre' ? customStore : store;
+    onConfirm(quantity, category, showDlc && dlc ? dlc : undefined, priceValue, finalStore || undefined);
   };
 
   const today = new Date().toISOString().split('T')[0];
@@ -223,13 +243,34 @@ const AddToFrigoModal: React.FC<AddToFrigoModalProps> = ({ product, onClose, onC
               </svg>
               Magasin
             </label>
-            <input
-              type="text"
-              value={store}
-              onChange={(e) => setStore(e.target.value)}
-              placeholder="Ex: Carrefour, Auchan..."
-              className="w-full glass-input text-white py-3 px-4 rounded-xl focus:ring-2 focus:ring-cyan-400/50 transition-all text-sm min-h-[48px] placeholder-gray-500"
-            />
+            <div className="relative">
+              <select
+                value={store}
+                onChange={(e) => setStore(e.target.value)}
+                className="w-full glass-input text-white py-3 px-4 pr-10 rounded-xl focus:ring-2 focus:ring-cyan-400/50 transition-all text-sm appearance-none min-h-[48px]"
+              >
+                <option value="" className="bg-gray-800 text-gray-400">Sélectionner un magasin</option>
+                {STORES.map((storeName) => (
+                  <option key={storeName} value={storeName} className="bg-gray-800 text-white">
+                    {storeName}
+                  </option>
+                ))}
+              </select>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+            {store === 'Autre' && (
+              <div className="mt-2 animate-slide-up">
+                <input
+                  type="text"
+                  value={customStore}
+                  onChange={(e) => setCustomStore(e.target.value)}
+                  placeholder="Entrez le nom du magasin"
+                  className="w-full glass-input text-white py-3 px-4 rounded-xl focus:ring-2 focus:ring-cyan-400/50 transition-all text-sm min-h-[48px] placeholder-gray-500"
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex gap-2.5 sm:gap-3 pt-2">
