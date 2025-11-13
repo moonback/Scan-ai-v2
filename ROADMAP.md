@@ -45,11 +45,11 @@ Ce document présente la feuille de route du projet Scan AI, des fonctionnalité
 
 ### 1.2 Fonctionnalités frigo
 
-- [ ] **Recherche et filtres avancés**
-  - Recherche textuelle dans le frigo
-  - Filtres multiples (catégorie + DLC + prix)
-  - Tri (date, nom, prix, DLC)
-  - Vue liste vs grille
+- [x] **Recherche et filtres avancés** ✅
+  - ✅ Recherche textuelle dans le frigo
+  - ✅ Filtres multiples (catégorie + DLC + prix)
+  - ✅ Tri (date, nom, prix, DLC)
+  - ✅ Vue liste vs grille
 
 - [ ] **Statistiques et insights**
   - Graphique de consommation (produits ajoutés/supprimés)
