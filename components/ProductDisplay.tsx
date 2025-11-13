@@ -1,6 +1,7 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { type Product } from '../types';
+import { frigoService, type FrigoItem } from '../services/frigoService';
+import PriceHistoryModal from './PriceHistoryModal';
 
 interface ProductDisplayProps {
   product: Product;
@@ -27,7 +28,51 @@ const NutriScore: React.FC<{ score: string }> = ({ score }) => {
 
 
 const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, onScanAnother, onAddToFrigo }) => {
+  const [frigoItem, setFrigoItem] = useState<FrigoItem | null>(null);
+  const [showPriceHistory, setShowPriceHistory] = useState(false);
+  const [showNutriments, setShowNutriments] = useState(false);
+
+  useEffect(() => {
+    // Vérifier si le produit est dans le frigo
+    const item = frigoService.getByProduct(product);
+    setFrigoItem(item);
+  }, [product]);
+
+  const hasHistory = frigoItem?.priceHistory && frigoItem.priceHistory.length > 0;
+  
+  const getPriceVariation = () => {
+    if (!frigoItem?.priceHistory || frigoItem.priceHistory.length < 2) return null;
+    
+    const latest = frigoItem.priceHistory[frigoItem.priceHistory.length - 1];
+    const previous = frigoItem.priceHistory[frigoItem.priceHistory.length - 2];
+    
+    const diff = latest.price - previous.price;
+    const percentage = ((diff / previous.price) * 100).toFixed(1);
+    
+    return { diff, percentage };
+  };
+
+  const mainNutriments = [
+    { key: 'energy-kcal_100g', label: 'Énergie', unit: 'kcal', icon: '⚡' },
+    { key: 'fat_100g', label: 'Matières grasses', unit: 'g', icon: '🧈' },
+    { key: 'saturated-fat_100g', label: 'Acides gras saturés', unit: 'g', icon: '🔴' },
+    { key: 'carbohydrates_100g', label: 'Glucides', unit: 'g', icon: '🍞' },
+    { key: 'sugars_100g', label: 'Sucres', unit: 'g', icon: '🍬' },
+    { key: 'proteins_100g', label: 'Protéines', unit: 'g', icon: '💪' },
+    { key: 'salt_100g', label: 'Sel', unit: 'g', icon: '🧂' },
+    { key: 'fiber_100g', label: 'Fibres', unit: 'g', icon: '🌾' },
+  ];
+
+  const variation = getPriceVariation();
+
   return (
+    <>
+      {showPriceHistory && frigoItem && (
+        <PriceHistoryModal 
+          item={frigoItem}
+          onClose={() => setShowPriceHistory(false)}
+        />
+      )}
     <div className="h-full overflow-y-auto smooth-scroll safe-area-top safe-area-bottom bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
         <div className="min-h-full p-3 sm:p-4 pb-20 sm:pb-24">
         <div className="max-w-lg mx-auto glass-product rounded-2xl sm:rounded-3xl overflow-hidden animate-scale-in shadow-2xl">
@@ -65,6 +110,121 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
                         </p>
                     )}
                 </div>
+
+                {/* Info Frigo - Prix et Magasin */}
+                {frigoItem && (frigoItem.price || frigoItem.store) && (
+                    <div className="glass-input border-2 border-cyan-400/30 rounded-xl p-3 space-y-2 animate-fade-in">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-400">Dans votre frigo</p>
+                                    {frigoItem.quantity && (
+                                        <p className="text-xs font-semibold text-cyan-400">Quantité: {frigoItem.quantity}</p>
+                                    )}
+                                </div>
+                            </div>
+                            {hasHistory && (
+                                <button
+                                    onClick={() => setShowPriceHistory(true)}
+                                    className="px-3 py-1.5 glass-button text-xs font-medium rounded-lg flex items-center gap-1.5 touch-feedback"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                    Historique
+                                </button>
+                            )}
+                        </div>
+                        
+                        {frigoItem.price && (
+                            <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/10">
+                                <div className="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span className="text-base font-bold text-green-400">{frigoItem.price.toFixed(2)} €</span>
+                                </div>
+                                {variation && (
+                                    <div className={`
+                                        flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold
+                                        ${variation.diff > 0 ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}
+                                    `}>
+                                        {variation.diff > 0 ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                            </svg>
+                                        )}
+                                        <span>{variation.percentage}%</span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        
+                        {frigoItem.store && (
+                            <div className="flex items-center gap-2 text-sm text-gray-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <span>{frigoItem.store}</span>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Valeurs Nutritionnelles */}
+                {product.nutriments && Object.keys(product.nutriments).length > 0 && (
+                    <div className="pt-3 border-t border-white/10">
+                        <button
+                            onClick={() => setShowNutriments(!showNutriments)}
+                            className="w-full flex items-center justify-between mb-2 group"
+                        >
+                            <h3 className="text-sm sm:text-base font-semibold text-gray-200 flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                Valeurs Nutritionnelles
+                            </h3>
+                            <svg 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                className={`h-5 w-5 text-gray-400 group-hover:text-cyan-400 transition-all ${showNutriments ? 'rotate-180' : ''}`}
+                                fill="none" 
+                                viewBox="0 0 24 24" 
+                                stroke="currentColor"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        {showNutriments && (
+                            <div className="glass-input rounded-xl p-3 space-y-2 animate-slide-up">
+                                <p className="text-xs text-gray-400 mb-2">Pour 100g / 100ml</p>
+                                {mainNutriments.map((nutriment) => {
+                                    const value = product.nutriments[nutriment.key];
+                                    if (value === undefined || value === null) return null;
+                                    return (
+                                        <div key={nutriment.key} className="flex items-center justify-between py-1.5 border-b border-white/5 last:border-0">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-base">{nutriment.icon}</span>
+                                                <span className="text-xs sm:text-sm text-gray-300">{nutriment.label}</span>
+                                            </div>
+                                            <span className="text-xs sm:text-sm font-semibold text-white">
+                                                {typeof value === 'number' ? value.toFixed(1) : value} {nutriment.unit}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 <div className="pt-3 border-t border-white/10">
                     <h3 className="text-sm sm:text-base font-semibold text-gray-200 mb-2 flex items-center gap-1.5">
@@ -115,6 +275,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
         </div>
         </div>
     </div>
+    </>
   );
 };
 

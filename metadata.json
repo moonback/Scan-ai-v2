@@ -1,5 +1,5 @@
 {
-  "name": "NutriScan AI",
+  "name": "Scan AI",
   "description": "An application to scan product barcodes, get information from OpenFoodFacts, and ask an AI assistant questions about the product with text-to-speech output.",
   "requestFramePermissions": [
     "camera"

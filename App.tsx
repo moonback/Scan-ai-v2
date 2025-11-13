@@ -182,11 +182,11 @@ const App: React.FC = () => {
 
   const getHeaderTitle = () => {
     switch(view) {
-        case View.Scanner: return "NutriScan AI";
+        case View.Scanner: return "Scan AI";
         case View.Product: return "Détails du Produit";
         case View.Chat: return "Assistant IA";
         case View.Frigo: return "Mon Frigo";
-        default: return "NutriScan AI";
+        default: return "Scan AI";
     }
   }
 
