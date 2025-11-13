@@ -7,8 +7,11 @@ import Chat from './components/Chat';
 import Header from './components/Header';
 import Frigo from './components/Frigo';
 import AddToFrigoModal from './components/AddToFrigoModal';
+import ProductExistsModal from './components/ProductExistsModal';
+import ModifyFrigoItemModal from './components/ModifyFrigoItemModal';
+import DLCNotifications from './components/DLCNotifications';
 import { fetchProductByBarcode } from './services/openFoodFactsService';
-import { frigoService, type FrigoCategory } from './services/frigoService';
+import { frigoService, type FrigoCategory, type FrigoItem } from './services/frigoService';
 
 const App: React.FC = () => {
   const [view, setView] = useState<View>(View.Scanner);
@@ -17,6 +20,9 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [frigoCount, setFrigoCount] = useState(0);
   const [showAddToFrigoModal, setShowAddToFrigoModal] = useState(false);
+  const [showProductExistsModal, setShowProductExistsModal] = useState(false);
+  const [showModifyItemModal, setShowModifyItemModal] = useState(false);
+  const [existingFrigoItem, setExistingFrigoItem] = useState<FrigoItem | null>(null);
 
   const handleScan = useCallback(async (barcode: string) => {
     setIsLoading(true);
@@ -24,7 +30,15 @@ const App: React.FC = () => {
     try {
       const productData = await fetchProductByBarcode(barcode);
       setProduct(productData);
-      setView(View.Product);
+      
+      // Vérifier si le produit existe déjà dans le frigo
+      const existingItem = frigoService.getByProduct(productData);
+      if (existingItem) {
+        setExistingFrigoItem(existingItem);
+        setShowProductExistsModal(true);
+      } else {
+        setView(View.Product);
+      }
     } catch (err: any) {
       setError(err.message || "Une erreur inconnue s'est produite.");
     } finally {
@@ -50,8 +64,66 @@ const App: React.FC = () => {
 
   const handleAddToFrigo = () => {
     if (product) {
-      setShowAddToFrigoModal(true);
+      // Vérifier si le produit existe déjà dans le frigo
+      const existingItem = frigoService.getByProduct(product);
+      if (existingItem) {
+        setExistingFrigoItem(existingItem);
+        setShowProductExistsModal(true);
+      } else {
+        setShowAddToFrigoModal(true);
+      }
     }
+  };
+
+  const handleAddToExistingStock = () => {
+    if (existingFrigoItem) {
+      const success = frigoService.incrementQuantity(existingFrigoItem.id, 1);
+      if (success) {
+        updateFrigoCount();
+        setShowProductExistsModal(false);
+        setExistingFrigoItem(null);
+        // Afficher un message de succès
+        alert('Quantité ajoutée au stock existant !');
+      }
+    }
+  };
+
+  const handleModifyExistingItem = () => {
+    setShowProductExistsModal(false);
+    setShowModifyItemModal(true);
+  };
+
+  const handleConfirmModifyItem = (quantity: number, category: FrigoCategory, dlc?: string) => {
+    if (existingFrigoItem) {
+      const success = frigoService.update(existingFrigoItem.id, {
+        quantity,
+        category,
+        dlc
+      });
+      if (success) {
+        updateFrigoCount();
+        setShowModifyItemModal(false);
+        setExistingFrigoItem(null);
+        alert('Fiche mise à jour avec succès !');
+      } else {
+        alert('Erreur lors de la mise à jour.');
+      }
+    }
+  };
+
+  const handleViewProductFromModal = () => {
+    setShowProductExistsModal(false);
+    setView(View.Product);
+  };
+
+  const handleCloseProductExistsModal = () => {
+    setShowProductExistsModal(false);
+    setExistingFrigoItem(null);
+  };
+
+  const handleCloseModifyItemModal = () => {
+    setShowModifyItemModal(false);
+    setExistingFrigoItem(null);
   };
 
   const handleConfirmAddToFrigo = (quantity: number, category: FrigoCategory, dlc?: string) => {
@@ -116,7 +188,8 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="h-screen w-screen flex flex-col font-sans bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="h-screen w-screen flex flex-col font-sans bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
+      <DLCNotifications />
       <Header 
         title={getHeaderTitle()} 
         showBack={view !== View.Scanner}
@@ -133,6 +206,23 @@ const App: React.FC = () => {
           product={product}
           onClose={() => setShowAddToFrigoModal(false)}
           onConfirm={handleConfirmAddToFrigo}
+        />
+      )}
+      {showProductExistsModal && product && existingFrigoItem && (
+        <ProductExistsModal
+          product={product}
+          existingItem={existingFrigoItem}
+          onAddToExisting={handleAddToExistingStock}
+          onModify={handleModifyExistingItem}
+          onViewProduct={handleViewProductFromModal}
+          onClose={handleCloseProductExistsModal}
+        />
+      )}
+      {showModifyItemModal && existingFrigoItem && (
+        <ModifyFrigoItemModal
+          item={existingFrigoItem}
+          onClose={handleCloseModifyItemModal}
+          onConfirm={handleConfirmModifyItem}
         />
       )}
     </div>

@@ -84,9 +84,36 @@ export const frigoService = {
   isInFrigo(product: Product): boolean {
     const items = this.getAll();
     return items.some(
-      item => item.product.product_name === product.product_name && 
+      item => item.product.product_name === product.product_name &&
               item.product.brands === product.brands
     );
+  },
+
+  // Obtenir un produit du frigo par nom et marque
+  getByProduct(product: Product): FrigoItem | null {
+    const items = this.getAll();
+    const found = items.find(
+      item => item.product.product_name === product.product_name &&
+              item.product.brands === product.brands
+    );
+    return found || null;
+  },
+
+  // Incrémenter la quantité d'un produit existant
+  incrementQuantity(id: string, amount: number = 1): boolean {
+    try {
+      const items = this.getAll();
+      const item = items.find(i => i.id === id);
+      if (item) {
+        item.quantity = (item.quantity || 1) + amount;
+        localStorage.setItem(FRIGO_STORAGE_KEY, JSON.stringify(items));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Erreur lors de l\'incrémentation de la quantité:', error);
+      return false;
+    }
   },
 
   // Obtenir le nombre total de produits dans le frigo

@@ -134,7 +134,7 @@ const Chat: React.FC<ChatProps> = ({ product, onBack }) => {
                 </svg>
               </div>
             )}
-            <div className={`max-w-[85%] sm:max-w-xs md:max-w-md p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-lg ${
+            <div className={`max-w-[85%] sm:max-w-xs md:max-w-md p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-lg transform hover:scale-[1.02] transition-all ${
               msg.role === 'user' 
                 ? 'glass-message-user text-white rounded-br-sm' 
                 : 'glass-message text-white rounded-bl-sm'
