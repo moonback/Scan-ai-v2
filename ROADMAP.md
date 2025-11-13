@@ -51,11 +51,11 @@ Ce document présente la feuille de route du projet Scan AI, des fonctionnalité
   - ✅ Tri (date, nom, prix, DLC)
   - ✅ Vue liste vs grille
 
-- [ ] **Statistiques et insights**
-  - Graphique de consommation (produits ajoutés/supprimés)
-  - Coût total du frigo
-  - Produits les plus consommés
-  - Taux de gaspillage (produits expirés)
+- [x] **Statistiques et insights** ✅
+  - ✅ Graphique de consommation (produits ajoutés/supprimés)
+  - ✅ Coût total du frigo
+  - ✅ Produits les plus consommés
+  - ✅ Taux de gaspillage (produits expirés)
 
 - [ ] **Export/Import de données**
   - Export JSON/CSV du frigo
