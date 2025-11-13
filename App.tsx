@@ -10,6 +10,7 @@ import AddToFrigoModal from './components/AddToFrigoModal';
 import ProductExistsModal from './components/ProductExistsModal';
 import ModifyFrigoItemModal from './components/ModifyFrigoItemModal';
 import DLCNotifications from './components/DLCNotifications';
+import BottomNav from './components/BottomNav';
 import { fetchProductByBarcode } from './services/openFoodFactsService';
 import { frigoService, type FrigoCategory, type FrigoItem } from './services/frigoService';
 
@@ -189,6 +190,18 @@ const App: React.FC = () => {
     }
   }
 
+  const handleBottomNavChange = (newView: View) => {
+    if (newView === View.Product && !product) {
+      // Si on clique sur Produit mais qu'il n'y a pas de produit, aller au scanner
+      setView(View.Scanner);
+    } else if (newView === View.Chat && !product) {
+      // Si on clique sur Chat mais qu'il n'y a pas de produit, aller au scanner
+      setView(View.Scanner);
+    } else {
+      setView(newView);
+    }
+  };
+
   return (
     <div className="h-screen w-screen flex flex-col font-sans bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
       <DLCNotifications />
@@ -200,9 +213,14 @@ const App: React.FC = () => {
         onFrigoClick={handleFrigoClick}
         frigoCount={frigoCount}
       />
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-hidden mb-16 md:mb-0">
         {renderContent()}
       </main>
+      <BottomNav 
+        currentView={view}
+        onViewChange={handleBottomNavChange}
+        frigoCount={frigoCount}
+      />
       {showAddToFrigoModal && product && (
         <AddToFrigoModal
           product={product}

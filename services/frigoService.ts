@@ -11,6 +11,12 @@ export type FrigoCategory =
   | 'Boulangerie'
   | 'Autre';
 
+export interface PriceHistoryEntry {
+  price: number;
+  store: string;
+  date: string;
+}
+
 export interface FrigoItem {
   id: string;
   product: Product;
@@ -18,8 +24,9 @@ export interface FrigoItem {
   quantity?: number;
   category?: FrigoCategory;
   dlc?: string; // Date Limite de Consommation (format ISO)
-  price?: number; // Prix d'achat
-  store?: string; // Magasin d'achat
+  price?: number; // Prix d'achat actuel
+  store?: string; // Magasin d'achat actuel
+  priceHistory?: PriceHistoryEntry[]; // Historique des prix et magasins
 }
 
 const FRIGO_STORAGE_KEY = 'nutriscan_frigo';
@@ -204,6 +211,33 @@ export const frigoService = {
       const items = this.getAll();
       const item = items.find(i => i.id === id);
       if (item) {
+        // Si le prix ou le magasin change, ajouter à l'historique
+        if ((updates.price !== undefined || updates.store !== undefined) && 
+            (updates.price !== item.price || updates.store !== item.store)) {
+          const currentPrice = updates.price ?? item.price;
+          const currentStore = updates.store ?? item.store;
+          
+          if (currentPrice !== undefined && currentStore !== undefined) {
+            const historyEntry: PriceHistoryEntry = {
+              price: currentPrice,
+              store: currentStore,
+              date: new Date().toISOString()
+            };
+            
+            if (!item.priceHistory) {
+              item.priceHistory = [];
+            }
+            
+            // Ajouter la nouvelle entrée à l'historique
+            item.priceHistory.push(historyEntry);
+            
+            // Limiter l'historique à 10 entrées
+            if (item.priceHistory.length > 10) {
+              item.priceHistory = item.priceHistory.slice(-10);
+            }
+          }
+        }
+        
         Object.assign(item, updates);
         localStorage.setItem(FRIGO_STORAGE_KEY, JSON.stringify(items));
         return true;
@@ -213,6 +247,27 @@ export const frigoService = {
       console.error('Erreur lors de la mise à jour:', error);
       return false;
     }
+  },
+
+  // Obtenir l'historique des prix d'un produit
+  getPriceHistory(id: string): PriceHistoryEntry[] {
+    const items = this.getAll();
+    const item = items.find(i => i.id === id);
+    return item?.priceHistory || [];
+  },
+
+  // Calculer la variation de prix par rapport au dernier achat
+  getPriceVariation(id: string): { amount: number; percentage: number } | null {
+    const history = this.getPriceHistory(id);
+    if (history.length < 2) return null;
+    
+    const latest = history[history.length - 1];
+    const previous = history[history.length - 2];
+    
+    const amount = latest.price - previous.price;
+    const percentage = (amount / previous.price) * 100;
+    
+    return { amount, percentage };
   }
 };
 

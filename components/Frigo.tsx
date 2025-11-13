@@ -31,6 +31,18 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<FrigoCategory | 'Tous'>('Tous');
 
+  const getPriceVariation = (item: FrigoItem) => {
+    if (!item.priceHistory || item.priceHistory.length < 2) return null;
+    
+    const latest = item.priceHistory[item.priceHistory.length - 1];
+    const previous = item.priceHistory[item.priceHistory.length - 2];
+    
+    const diff = latest.price - previous.price;
+    const percentage = ((diff / previous.price) * 100).toFixed(1);
+    
+    return { diff, percentage };
+  };
+
   useEffect(() => {
     loadFrigo();
   }, []);
@@ -282,11 +294,34 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
                 {(item.price || item.store) && (
                   <div className="mb-1.5 space-y-0.5">
                     {item.price && (
-                      <div className="flex items-center gap-1 text-xs text-green-400 font-semibold">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>{item.price.toFixed(2)} €</span>
+                      <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1 text-xs text-green-400 font-semibold">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span>{item.price.toFixed(2)} €</span>
+                        </div>
+                        {(() => {
+                          const variation = getPriceVariation(item);
+                          if (!variation) return null;
+                          return (
+                            <div className={`
+                              flex items-center gap-0.5 px-1 py-0.5 rounded text-[10px] font-bold
+                              ${variation.diff > 0 ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}
+                            `}>
+                              {variation.diff > 0 ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                </svg>
+                              ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                </svg>
+                              )}
+                              <span>{variation.percentage}%</span>
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
                     {item.store && (

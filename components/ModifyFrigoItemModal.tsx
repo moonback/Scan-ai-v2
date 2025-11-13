@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { type Product } from '../types';
 import { type FrigoCategory, type FrigoItem } from '../services/frigoService';
+import PriceHistoryModal from './PriceHistoryModal';
 
 interface ModifyFrigoItemModalProps {
   item: FrigoItem;
@@ -50,6 +51,9 @@ const ModifyFrigoItemModal: React.FC<ModifyFrigoItemModalProps> = ({ item, onClo
   const [customStore, setCustomStore] = useState(isStoreInList ? '' : (item.store || ''));
   
   const [hasChanges, setHasChanges] = useState(false);
+  const [showPriceHistory, setShowPriceHistory] = useState(false);
+  
+  const hasHistory = item.priceHistory && item.priceHistory.length > 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,8 +77,15 @@ const ModifyFrigoItemModal: React.FC<ModifyFrigoItemModalProps> = ({ item, onClo
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-md animate-fade-in">
-      <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-5 w-full max-w-md max-h-[90vh] overflow-y-auto smooth-scroll animate-bounce-in shadow-2xl border-2 border-cyan-400/20">
+    <>
+      {showPriceHistory && (
+        <PriceHistoryModal 
+          item={item}
+          onClose={() => setShowPriceHistory(false)}
+        />
+      )}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-md animate-fade-in">
+        <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-5 w-full max-w-md max-h-[90vh] overflow-y-auto smooth-scroll animate-bounce-in shadow-2xl border-2 border-cyan-400/20">
         <div className="flex items-start justify-between mb-4 sm:mb-5">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
@@ -235,12 +246,26 @@ const ModifyFrigoItemModal: React.FC<ModifyFrigoItemModalProps> = ({ item, onClo
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-300 mb-2 flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Prix d'achat (€)
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-semibold text-gray-300 flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Prix d'achat (€)
+              </label>
+              {hasHistory && (
+                <button
+                  type="button"
+                  onClick={() => setShowPriceHistory(true)}
+                  className="text-xs font-medium px-3 py-1.5 rounded-lg glass-input text-cyan-400 hover:bg-white/10 transition-all flex items-center gap-1.5"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  Historique
+                </button>
+              )}
+            </div>
             <input
               type="number"
               step="0.01"
@@ -322,6 +347,7 @@ const ModifyFrigoItemModal: React.FC<ModifyFrigoItemModalProps> = ({ item, onClo
         </form>
       </div>
     </div>
+    </>
   );
 };
 
