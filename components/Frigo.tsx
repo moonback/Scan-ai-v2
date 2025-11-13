@@ -92,25 +92,25 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
 
   if (items.length === 0) {
     return (
-      <div className="p-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-y-auto h-full">
-        <div className="max-w-2xl mx-auto flex flex-col items-center justify-center h-full text-center">
-          <div className="w-24 h-24 glass-icon rounded-2xl flex items-center justify-center mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="p-4 sm:p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-y-auto h-full smooth-scroll safe-area-top safe-area-bottom">
+        <div className="max-w-2xl mx-auto flex flex-col items-center justify-center h-full text-center animate-fade-in">
+          <div className="w-28 h-28 sm:w-32 sm:h-32 glass-icon rounded-3xl flex items-center justify-center mb-6 shadow-2xl animate-pulse-slow">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 sm:h-20 sm:w-20 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-500 bg-clip-text text-transparent">
             Votre Frigo est Vide
           </h2>
-          <p className="text-gray-400 mb-6 text-sm">
+          <p className="text-gray-400 mb-8 text-base sm:text-lg max-w-md mx-auto leading-relaxed">
             Scannez des produits et ajoutez-les à votre frigo virtuel pour les retrouver facilement !
           </p>
           <button
             onClick={onBack}
-            className="glass-button text-white font-semibold py-2.5 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] flex items-center gap-2"
+            className="glass-button text-white font-semibold py-4 sm:py-5 px-8 sm:px-10 rounded-xl sm:rounded-2xl transition-all duration-200 flex items-center gap-3 text-base sm:text-lg touch-feedback min-h-[56px] shadow-xl"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
             </svg>
             Scanner un Produit
           </button>
@@ -120,7 +120,7 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
   }
 
   return (
-    <div className="p-2 sm:p-3 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-y-auto h-full">
+    <div className="p-4 sm:p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-y-auto h-full smooth-scroll safe-area-top safe-area-bottom">
       <div className="max-w-6xl mx-auto">
         {/* Alertes DLC */}
         {(expiredItems.length > 0 || expiringSoonItems.length > 0) && (
@@ -153,11 +153,11 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
         )}
 
         {/* Header avec statistiques */}
-        <div className="mb-3 sm:mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-500 bg-clip-text text-transparent flex items-center gap-2.5 sm:gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-7 sm:w-7 text-cyan-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
               <span className="truncate">Mon Frigo ({items.length} {items.length > 1 ? 'produits' : 'produit'})</span>
             </h2>
@@ -165,10 +165,10 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
           {items.length > 0 && (
             <button
               onClick={handleClearAll}
-              className="glass-input text-red-400 hover:text-red-300 font-medium py-1.5 px-2 sm:px-3 rounded-lg transition-all duration-200 text-xs flex items-center gap-1.5 whitespace-nowrap"
+              className="glass-input text-red-400 hover:text-red-300 font-medium py-3 px-4 sm:px-5 rounded-xl transition-all duration-200 text-sm flex items-center gap-2 whitespace-nowrap touch-feedback min-h-[48px]"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
               <span className="hidden sm:inline">Vider le frigo</span>
               <span className="sm:hidden">Vider</span>
@@ -178,14 +178,14 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
 
         {/* Filtres par catégorie */}
         {categories.length > 0 && (
-          <div className="mb-3 sm:mb-4 overflow-x-auto">
-            <div className="flex gap-2 pb-2">
+          <div className="mb-4 sm:mb-6 overflow-x-auto smooth-scroll">
+            <div className="flex gap-2.5 sm:gap-3 pb-2">
               <button
                 onClick={() => setSelectedCategory('Tous')}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
+                className={`px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-sm sm:text-base font-semibold whitespace-nowrap transition-all touch-feedback min-h-[44px] ${
                   selectedCategory === 'Tous'
-                    ? 'glass-button text-white'
-                    : 'glass-input text-gray-300 hover:text-white'
+                    ? 'glass-button text-white shadow-lg'
+                    : 'glass-input text-gray-300 hover:text-white active:bg-white/5'
                 }`}
               >
                 Tous
@@ -194,10 +194,10 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
+                  className={`px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-sm sm:text-base font-semibold whitespace-nowrap transition-all touch-feedback min-h-[44px] ${
                     selectedCategory === cat
-                      ? 'glass-button text-white'
-                      : 'glass-input text-gray-300 hover:text-white'
+                      ? 'glass-button text-white shadow-lg'
+                      : 'glass-input text-gray-300 hover:text-white active:bg-white/5'
                   }`}
                 >
                   {cat}
@@ -214,7 +214,7 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
             return (
             <div
               key={item.id}
-              className="glass-product rounded-lg sm:rounded-xl overflow-hidden transform transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+              className="glass-product rounded-2xl sm:rounded-3xl overflow-hidden transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer touch-feedback shadow-lg"
               onClick={() => onProductSelect(item.product)}
             >
               <div className="relative">

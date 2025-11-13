@@ -97,31 +97,31 @@ const Chat: React.FC<ChatProps> = ({ product, onBack }) => {
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      <div className="flex items-center p-3 glass-header border-b border-white/10">
+      <div className="flex items-center p-3 sm:p-4 glass-header border-b border-white/10 safe-area-top">
         <button 
           onClick={onBack} 
-          className="mr-3 p-1.5 rounded-lg hover:bg-white/10 transition-all duration-200 group"
+          className="mr-3 p-2.5 rounded-xl hover:bg-white/10 active:bg-white/5 transition-all duration-200 group touch-feedback min-w-[48px] min-h-[48px]"
           aria-label="Retour"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300 group-hover:text-cyan-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-300 group-hover:text-cyan-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         <img 
           src={product.image_url} 
           alt={product.product_name} 
-          className="w-10 h-10 rounded-lg object-cover mr-2 border border-white/20 shadow-md"
+          className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover mr-3 border-2 border-white/20 shadow-lg"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/40/374151/9CA3AF?text=?';
+            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/56/374151/9CA3AF?text=?';
           }}
         />
         <div className="flex-1 min-w-0">
-          <h2 className="text-base font-semibold truncate text-white">{product.product_name}</h2>
-          <p className="text-xs text-gray-400 truncate">Assistant IA</p>
+          <h2 className="text-base sm:text-lg font-semibold truncate text-white">{product.product_name}</h2>
+          <p className="text-xs sm:text-sm text-gray-400 truncate">Assistant IA</p>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2 sm:p-3 space-y-2 sm:space-y-3 bg-gradient-to-b from-transparent to-gray-900/50">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 sm:space-y-4 bg-gradient-to-b from-transparent to-gray-900/50 smooth-scroll">
         {messages.map((msg, index) => (
           <div 
             key={index} 
@@ -134,12 +134,12 @@ const Chat: React.FC<ChatProps> = ({ product, onBack }) => {
                 </svg>
               </div>
             )}
-            <div className={`max-w-[85%] sm:max-w-xs md:max-w-md p-2.5 sm:p-3 rounded-lg sm:rounded-xl shadow-lg ${
+            <div className={`max-w-[85%] sm:max-w-xs md:max-w-md p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-lg ${
               msg.role === 'user' 
                 ? 'glass-message-user text-white rounded-br-sm' 
                 : 'glass-message text-white rounded-bl-sm'
             }`}>
-              <p className="whitespace-pre-wrap leading-relaxed text-sm">{msg.text}</p>
+              <p className="whitespace-pre-wrap leading-relaxed text-sm sm:text-base">{msg.text}</p>
               {msg.role === 'model' && (
                 <div className="mt-2 flex items-center justify-between gap-2 pt-2 border-t border-white/10">
                   <SpeakerIcon text={msg.text}/>
@@ -192,23 +192,24 @@ const Chat: React.FC<ChatProps> = ({ product, onBack }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSubmit} className="p-2 sm:p-3 glass-header border-t border-white/10">
-        <div className="flex items-center glass-chat-input rounded-lg sm:rounded-xl focus-within:ring-2 focus-within:ring-cyan-400/30 transition-all">
+      <form onSubmit={handleSubmit} className="p-3 sm:p-4 glass-header border-t border-white/10 safe-area-bottom">
+        <div className="flex items-center glass-chat-input rounded-2xl sm:rounded-3xl focus-within:ring-2 focus-within:ring-cyan-400/30 transition-all px-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Posez une question..."
-            className="flex-1 bg-transparent p-2 sm:p-2.5 text-white placeholder-gray-400 focus:outline-none text-xs sm:text-sm"
+            className="flex-1 bg-transparent p-3 sm:p-4 text-white placeholder-gray-400 focus:outline-none text-sm sm:text-base min-h-[48px]"
+            autoComplete="off"
           />
           <button 
             type="submit" 
             disabled={!input.trim() || isLoading} 
-            className="m-1.5 p-2 glass-button rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:transform-none"
+            className="m-1 p-3 sm:p-4 glass-button rounded-xl sm:rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed touch-feedback min-w-[48px] min-h-[48px] flex items-center justify-center"
             aria-label="Envoyer"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>
           </button>
         </div>
