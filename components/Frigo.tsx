@@ -4,6 +4,9 @@ import { type Product } from '../types';
 import { frigoService, type FrigoItem, type FrigoCategory } from '../services/frigoService';
 import Loader from './Loader';
 import FrigoStats from './FrigoStats';
+import ImageScanner from './ImageScanner';
+import ProductSelectionModal from './ProductSelectionModal';
+import { type DetectedProduct } from '../services/visionService';
 
 interface FrigoProps {
   onProductSelect: (product: Product) => void;
@@ -41,6 +44,11 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
   const [priceFilter, setPriceFilter] = useState<{ min?: number; max?: number }>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showImageScanner, setShowImageScanner] = useState(false);
+  const [imageScannerType, setImageScannerType] = useState<'receipt' | 'basket'>('receipt');
+  const [detectedProducts, setDetectedProducts] = useState<DetectedProduct[]>([]);
+  const [showProductSelection, setShowProductSelection] = useState(false);
+  const [scanMetadata, setScanMetadata] = useState<{ store?: string; date?: string; totalAmount?: number } | undefined>();
 
   const getPriceVariation = (item: FrigoItem) => {
     if (!item.priceHistory || item.priceHistory.length < 2) return null;
@@ -183,15 +191,29 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
           <p className="text-gray-400 mb-8 text-base sm:text-lg max-w-md mx-auto leading-relaxed">
             Scannez des produits et ajoutez-les à votre frigo virtuel pour les retrouver facilement !
           </p>
-          <button
-            onClick={onBack}
-            className="glass-button text-white font-semibold py-4 sm:py-5 px-8 sm:px-10 rounded-xl sm:rounded-2xl transition-all duration-200 flex items-center gap-3 text-base sm:text-lg touch-feedback min-h-[56px] shadow-xl"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-            </svg>
-            Scanner un Produit
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+            <button
+              onClick={onBack}
+              className="glass-button text-white font-semibold py-4 sm:py-5 px-8 sm:px-10 rounded-xl sm:rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 text-base sm:text-lg touch-feedback min-h-[56px] shadow-xl flex-1"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+              </svg>
+              Scanner un Produit
+            </button>
+            <button
+              onClick={() => {
+                setImageScannerType('receipt');
+                setShowImageScanner(true);
+              }}
+              className="glass-input text-white font-semibold py-4 sm:py-5 px-8 sm:px-10 rounded-xl sm:rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 text-base sm:text-lg touch-feedback min-h-[56px] hover:bg-white/10 flex-1"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Scanner Ticket
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -232,16 +254,47 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
 
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
 
-        {/* Bouton flottant pour ouvrir la sidebar (mobile uniquement) */}
-        <button
-          onClick={() => setIsSidebarOpen(true)}
-          className="fixed bottom-24 right-4 sm:hidden z-40 glass-button p-4 rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 touch-feedback"
-          aria-label="Ouvrir les filtres"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-          </svg>
-        </button>
+        {/* Boutons flottants (mobile uniquement) */}
+        <div className="fixed bottom-24 right-4 sm:hidden z-40 flex flex-col gap-3">
+          {/* Bouton scanner ticket */}
+          <button
+            onClick={() => {
+              setImageScannerType('receipt');
+              setShowImageScanner(true);
+            }}
+            className="glass-button p-4 rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 touch-feedback"
+            aria-label="Scanner un ticket"
+            title="Scanner un ticket de caisse"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </button>
+          {/* Bouton scanner panier */}
+          <button
+            onClick={() => {
+              setImageScannerType('basket');
+              setShowImageScanner(true);
+            }}
+            className="glass-button p-4 rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 touch-feedback"
+            aria-label="Scanner un panier"
+            title="Scanner un panier"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </button>
+          {/* Bouton filtres */}
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="glass-button p-4 rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 touch-feedback"
+            aria-label="Ouvrir les filtres"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+          </button>
+        </div>
 
         {/* Overlay pour fermer la sidebar (mobile uniquement) */}
         {isSidebarOpen && (
@@ -477,6 +530,36 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
           </div>
         </div>
 
+        {/* Boutons d'ajout rapide (desktop) */}
+        {items.length > 0 && (
+          <div className="hidden sm:flex items-center gap-2 mb-4">
+            <button
+              onClick={() => {
+                setImageScannerType('receipt');
+                setShowImageScanner(true);
+              }}
+              className="glass-input text-white font-medium py-2.5 px-4 rounded-xl transition-all hover:bg-white/10 text-sm flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Scanner ticket
+            </button>
+            <button
+              onClick={() => {
+                setImageScannerType('basket');
+                setShowImageScanner(true);
+              }}
+              className="glass-input text-white font-medium py-2.5 px-4 rounded-xl transition-all hover:bg-white/10 text-sm flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              Scanner panier
+            </button>
+          </div>
+        )}
+
         {/* Contenu principal */}
         <div className="flex-1 min-w-0">
           {/* Header avec statistiques */}
@@ -561,6 +644,76 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
         </div>
       </div>
       </div>
+
+      {/* Image Scanner Modal */}
+      {showImageScanner && (
+        <ImageScanner
+          type={imageScannerType}
+          onProductsDetected={(products, metadata) => {
+            setDetectedProducts(products);
+            setScanMetadata(metadata);
+            setShowImageScanner(false);
+            setShowProductSelection(true);
+          }}
+          onClose={() => {
+            setShowImageScanner(false);
+          }}
+        />
+      )}
+
+      {/* Product Selection Modal */}
+      {showProductSelection && (
+        <ProductSelectionModal
+          detectedProducts={detectedProducts}
+          metadata={scanMetadata}
+          onConfirm={async (selectedProducts) => {
+            let addedCount = 0;
+            for (const { product, quantity, price } of selectedProducts) {
+              // Essayer de trouver la catégorie depuis le nom du produit
+              let category: FrigoCategory | undefined = undefined;
+              const nameLower = product.product_name.toLowerCase();
+              if (nameLower.includes('fruit') || nameLower.includes('légume') || nameLower.includes('vegetable')) {
+                category = 'Fruits & Légumes';
+              } else if (nameLower.includes('viande') || nameLower.includes('poisson') || nameLower.includes('meat') || nameLower.includes('fish')) {
+                category = 'Viandes & Poissons';
+              } else if (nameLower.includes('lait') || nameLower.includes('fromage') || nameLower.includes('yaourt') || nameLower.includes('dairy')) {
+                category = 'Produits Laitiers';
+              } else if (nameLower.includes('boisson') || nameLower.includes('drink') || nameLower.includes('eau')) {
+                category = 'Boissons';
+              } else if (nameLower.includes('surgelé') || nameLower.includes('frozen')) {
+                category = 'Surgelés';
+              } else if (nameLower.includes('pain') || nameLower.includes('boulang') || nameLower.includes('bread')) {
+                category = 'Boulangerie';
+              }
+
+              const success = frigoService.add(
+                product,
+                quantity,
+                category,
+                undefined, // DLC
+                price,
+                scanMetadata?.store
+              );
+              if (success) addedCount++;
+            }
+            
+            if (addedCount > 0) {
+              loadFrigo();
+              onFrigoChange?.();
+              alert(`${addedCount} produit${addedCount > 1 ? 's' : ''} ajouté${addedCount > 1 ? 's' : ''} au frigo !`);
+            }
+            
+            setShowProductSelection(false);
+            setDetectedProducts([]);
+            setScanMetadata(undefined);
+          }}
+          onClose={() => {
+            setShowProductSelection(false);
+            setDetectedProducts([]);
+            setScanMetadata(undefined);
+          }}
+        />
+      )}
     </div>
   );
 
