@@ -35,5 +35,6 @@ export interface ChatMessage {
 export enum View {
   Scanner,
   Product,
-  Chat
+  Chat,
+  Frigo
 }

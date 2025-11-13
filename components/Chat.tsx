@@ -121,7 +121,7 @@ const Chat: React.FC<ChatProps> = ({ product, onBack }) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gradient-to-b from-transparent to-gray-900/50">
+      <div className="flex-1 overflow-y-auto p-2 sm:p-3 space-y-2 sm:space-y-3 bg-gradient-to-b from-transparent to-gray-900/50">
         {messages.map((msg, index) => (
           <div 
             key={index} 
@@ -134,7 +134,7 @@ const Chat: React.FC<ChatProps> = ({ product, onBack }) => {
                 </svg>
               </div>
             )}
-            <div className={`max-w-xs md:max-w-md p-3 rounded-xl shadow-lg ${
+            <div className={`max-w-[85%] sm:max-w-xs md:max-w-md p-2.5 sm:p-3 rounded-lg sm:rounded-xl shadow-lg ${
               msg.role === 'user' 
                 ? 'glass-message-user text-white rounded-br-sm' 
                 : 'glass-message text-white rounded-bl-sm'
@@ -192,14 +192,14 @@ const Chat: React.FC<ChatProps> = ({ product, onBack }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSubmit} className="p-3 glass-header border-t border-white/10">
-        <div className="flex items-center glass-chat-input rounded-xl focus-within:ring-2 focus-within:ring-cyan-400/30 transition-all">
+      <form onSubmit={handleSubmit} className="p-2 sm:p-3 glass-header border-t border-white/10">
+        <div className="flex items-center glass-chat-input rounded-lg sm:rounded-xl focus-within:ring-2 focus-within:ring-cyan-400/30 transition-all">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Posez une question..."
-            className="flex-1 bg-transparent p-2.5 text-white placeholder-gray-400 focus:outline-none text-sm"
+            className="flex-1 bg-transparent p-2 sm:p-2.5 text-white placeholder-gray-400 focus:outline-none text-xs sm:text-sm"
           />
           <button 
             type="submit" 

@@ -32,15 +32,15 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, isLoading, erro
   }, [barcode, onScan]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-full p-3 text-center overflow-y-auto">
-      <div className="w-full max-w-md glass-card p-5 rounded-2xl">
-        <div className="mb-4">
-          <div className="w-14 h-14 mx-auto mb-3 glass-icon rounded-xl flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div className="flex flex-col items-center justify-center h-full p-2 sm:p-3 text-center overflow-y-auto">
+      <div className="w-full max-w-md glass-card p-4 sm:p-5 rounded-xl sm:rounded-2xl">
+        <div className="mb-3 sm:mb-4">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-2 sm:mb-3 glass-icon rounded-lg sm:rounded-xl flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-8 sm:w-8 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold mb-1 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+          <h2 className="text-xl sm:text-2xl font-bold mb-1 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
             Scanner un Produit
           </h2>
           <p className="text-gray-400 text-xs">Entrez le code-barres EAN-13</p>
@@ -54,7 +54,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, isLoading, erro
               onChange={handleInputChange}
               placeholder="Entrez le code-barres (13 chiffres)"
               maxLength={13}
-              className="w-full glass-input text-white placeholder-gray-400 text-center text-lg p-3 rounded-xl font-mono tracking-widest focus:ring-2 focus:ring-cyan-400/50 transition-all"
+              className="w-full glass-input text-white placeholder-gray-400 text-center text-base sm:text-lg p-2.5 sm:p-3 rounded-lg sm:rounded-xl font-mono tracking-widest focus:ring-2 focus:ring-cyan-400/50 transition-all"
               inputMode="numeric"
               pattern="\d{13}"
             />

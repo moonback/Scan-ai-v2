@@ -6,6 +6,7 @@ interface ProductDisplayProps {
   product: Product;
   onStartChat: () => void;
   onScanAnother: () => void;
+  onAddToFrigo?: () => void;
 }
 
 const NutriScore: React.FC<{ score: string }> = ({ score }) => {
@@ -25,14 +26,14 @@ const NutriScore: React.FC<{ score: string }> = ({ score }) => {
 };
 
 
-const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, onScanAnother }) => {
+const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, onScanAnother, onAddToFrigo }) => {
   return (
-    <div className="p-3 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-y-auto">
-        <div className="max-w-lg mx-auto glass-product rounded-2xl overflow-hidden transform transition-all duration-300">
+    <div className="p-2 sm:p-3 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-y-auto">
+        <div className="max-w-lg mx-auto glass-product rounded-xl sm:rounded-2xl overflow-hidden transform transition-all duration-300">
             <div className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent z-10"></div>
                 <img 
-                    className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105" 
+                    className="w-full h-40 sm:h-48 object-cover transition-transform duration-500 hover:scale-105" 
                     src={product.image_url || 'https://picsum.photos/400/300'} 
                     alt={product.product_name}
                     onError={(e) => {
@@ -40,17 +41,17 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
                     }}
                 />
                  {product.nutriscore_grade && (
-                    <div className="absolute top-3 right-3 z-20 transform hover:scale-110 transition-transform">
+                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-20 transform hover:scale-110 transition-transform">
                         <NutriScore score={product.nutriscore_grade} />
                     </div>
                  )}
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-3 sm:p-4 space-y-2 sm:space-y-3">
                 <div>
                     <div className="uppercase tracking-wide text-xs text-cyan-400 font-semibold mb-1">
                         {product.brands || 'Marque inconnue'}
                     </div>
-                    <h2 className="text-xl leading-tight font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                    <h2 className="text-lg sm:text-xl leading-tight font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                         {product.product_name}
                     </h2>
                     {product.quantity && (
@@ -78,6 +79,17 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
                 </div>
 
                 <div className="pt-3 flex flex-col gap-2">
+                    {onAddToFrigo && (
+                        <button 
+                            onClick={onAddToFrigo} 
+                            className="w-full glass-button text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.01] flex items-center justify-center gap-2 text-sm"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
+                            <span>Ajouter au Frigo</span>
+                        </button>
+                    )}
                     <button 
                         onClick={onStartChat} 
                         className="w-full glass-button text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.01] flex items-center justify-center gap-2 text-sm"
