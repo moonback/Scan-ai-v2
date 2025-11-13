@@ -6,7 +6,7 @@ import { type FrigoCategory } from '../services/frigoService';
 interface AddToFrigoModalProps {
   product: Product;
   onClose: () => void;
-  onConfirm: (quantity: number, category: FrigoCategory, dlc?: string) => void;
+  onConfirm: (quantity: number, category: FrigoCategory, dlc?: string, price?: number, store?: string) => void;
 }
 
 const CATEGORIES: FrigoCategory[] = [
@@ -25,10 +25,13 @@ const AddToFrigoModal: React.FC<AddToFrigoModalProps> = ({ product, onClose, onC
   const [category, setCategory] = useState<FrigoCategory>('Autre');
   const [dlc, setDlc] = useState('');
   const [showDlc, setShowDlc] = useState(false);
+  const [price, setPrice] = useState('');
+  const [store, setStore] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onConfirm(quantity, category, showDlc && dlc ? dlc : undefined);
+    const priceValue = price ? parseFloat(price) : undefined;
+    onConfirm(quantity, category, showDlc && dlc ? dlc : undefined, priceValue, store || undefined);
   };
 
   const today = new Date().toISOString().split('T')[0];
@@ -193,6 +196,40 @@ const AddToFrigoModal: React.FC<AddToFrigoModalProps> = ({ product, onClose, onC
                 />
               </div>
             )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-300 mb-2 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Prix d'achat (€)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="0.00"
+              className="w-full glass-input text-white py-3 px-4 rounded-xl focus:ring-2 focus:ring-cyan-400/50 transition-all text-sm min-h-[48px] placeholder-gray-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-300 mb-2 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              Magasin
+            </label>
+            <input
+              type="text"
+              value={store}
+              onChange={(e) => setStore(e.target.value)}
+              placeholder="Ex: Carrefour, Auchan..."
+              className="w-full glass-input text-white py-3 px-4 rounded-xl focus:ring-2 focus:ring-cyan-400/50 transition-all text-sm min-h-[48px] placeholder-gray-500"
+            />
           </div>
 
           <div className="flex gap-2.5 sm:gap-3 pt-2">

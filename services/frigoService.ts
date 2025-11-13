@@ -18,6 +18,8 @@ export interface FrigoItem {
   quantity?: number;
   category?: FrigoCategory;
   dlc?: string; // Date Limite de Consommation (format ISO)
+  price?: number; // Prix d'achat
+  store?: string; // Magasin d'achat
 }
 
 const FRIGO_STORAGE_KEY = 'nutriscan_frigo';
@@ -35,7 +37,7 @@ export const frigoService = {
   },
 
   // Ajouter un produit au frigo
-  add(product: Product, quantity: number = 1, category?: FrigoCategory, dlc?: string): boolean {
+  add(product: Product, quantity: number = 1, category?: FrigoCategory, dlc?: string, price?: number, store?: string): boolean {
     try {
       const items = this.getAll();
       const existingIndex = items.findIndex(
@@ -49,7 +51,9 @@ export const frigoService = {
         addedAt: new Date().toISOString(),
         quantity: existingIndex >= 0 ? (items[existingIndex].quantity || 0) + quantity : quantity,
         category: category || 'Autre',
-        dlc: dlc
+        dlc: dlc,
+        price: price,
+        store: store
       };
 
       if (existingIndex >= 0) {

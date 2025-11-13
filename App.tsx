@@ -93,12 +93,14 @@ const App: React.FC = () => {
     setShowModifyItemModal(true);
   };
 
-  const handleConfirmModifyItem = (quantity: number, category: FrigoCategory, dlc?: string) => {
+  const handleConfirmModifyItem = (quantity: number, category: FrigoCategory, dlc?: string, price?: number, store?: string) => {
     if (existingFrigoItem) {
       const success = frigoService.update(existingFrigoItem.id, {
         quantity,
         category,
-        dlc
+        dlc,
+        price,
+        store
       });
       if (success) {
         updateFrigoCount();
@@ -126,9 +128,9 @@ const App: React.FC = () => {
     setExistingFrigoItem(null);
   };
 
-  const handleConfirmAddToFrigo = (quantity: number, category: FrigoCategory, dlc?: string) => {
+  const handleConfirmAddToFrigo = (quantity: number, category: FrigoCategory, dlc?: string, price?: number, store?: string) => {
     if (product) {
-      const success = frigoService.add(product, quantity, category, dlc);
+      const success = frigoService.add(product, quantity, category, dlc, price, store);
       if (success) {
         updateFrigoCount();
         setShowAddToFrigoModal(false);
