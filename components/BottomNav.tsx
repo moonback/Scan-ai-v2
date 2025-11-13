@@ -5,10 +5,11 @@ interface BottomNavProps {
   currentView: View;
   onViewChange: (view: View) => void;
   frigoCount: number;
+  hasProduct?: boolean; // Indique si un produit est sélectionné
 }
 
-const BottomNav: React.FC<BottomNavProps> = ({ currentView, onViewChange, frigoCount }) => {
-  const navItems = [
+const BottomNav: React.FC<BottomNavProps> = ({ currentView, onViewChange, frigoCount, hasProduct = false }) => {
+  const allNavItems = [
     {
       view: View.Scanner,
       icon: (
@@ -38,7 +39,8 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, onViewChange, frigoC
         </svg>
       ),
       label: 'Produit',
-      showBadge: false
+      showBadge: false,
+      requiresProduct: true // Nécessite un produit sélectionné
     },
     {
       view: View.Chat,
@@ -48,20 +50,28 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, onViewChange, frigoC
         </svg>
       ),
       label: 'Chat',
-      showBadge: false
+      showBadge: false,
+      requiresProduct: true // Nécessite un produit sélectionné
     }
   ];
 
+  // Filtrer les items selon si un produit est sélectionné
+  const navItems = allNavItems.filter(item => 
+    !item.requiresProduct || hasProduct
+  );
+
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-header border-t border-white/10 safe-area-bottom z-40">
-      <div className="flex items-center justify-around px-2 pb-2 pt-1">
+      <div className={`flex items-center px-2 pb-2 pt-1 ${
+        navItems.length === 2 ? 'justify-center gap-12' : 'justify-around'
+      }`}>
         {navItems.map((item) => (
           <button
             key={item.view}
             onClick={() => onViewChange(item.view)}
             className={`
               relative flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl
-              transition-all duration-200 touch-feedback min-w-[64px]
+              transition-all duration-200 touch-feedback min-w-[64px] flex-1 max-w-[120px]
               ${currentView === item.view 
                 ? 'text-cyan-400' 
                 : 'text-gray-400 hover:text-gray-300'

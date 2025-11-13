@@ -220,6 +220,7 @@ const App: React.FC = () => {
         currentView={view}
         onViewChange={handleBottomNavChange}
         frigoCount={frigoCount}
+        hasProduct={!!product}
       />
       {showAddToFrigoModal && product && (
         <AddToFrigoModal
