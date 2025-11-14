@@ -33,7 +33,7 @@ const ProductExistsModal: React.FC<ProductExistsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-md animate-fade-in">
-      <div className="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto smooth-scroll animate-bounce-in shadow-2xl border-2 border-cyan-400/30">
+      <div className="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto smooth-scroll animate-bounce-in shadow-2xl border-2 border-[#2563eb]/30">
         {/* Header */}
         <div className="flex items-start justify-between mb-5">
           <div className="flex items-center gap-3">
@@ -51,10 +51,10 @@ const ProductExistsModal: React.FC<ProductExistsModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl hover:bg-white/10 active:bg-white/5 transition-all touch-feedback"
+            className="p-2 rounded-xl hover:bg-slate-100 active:bg-slate-50 transition-all touch-feedback"
             aria-label="Fermer"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 hover:text-slate-900 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -72,7 +72,7 @@ const ProductExistsModal: React.FC<ProductExistsModalProps> = ({
               }}
             />
             <div className="flex-1 min-w-0">
-              <p className="text-base sm:text-lg font-bold text-white truncate mb-1">{product.product_name}</p>
+              <p className="text-base sm:text-lg font-bold text-slate-900 truncate mb-1">{product.product_name}</p>
               <p className="text-sm text-gray-400 truncate">{product.brands || 'Marque inconnue'}</p>
             </div>
           </div>
@@ -86,7 +86,7 @@ const ProductExistsModal: React.FC<ProductExistsModalProps> = ({
                 </svg>
                 Quantité actuelle
               </span>
-              <span className="font-bold text-cyan-400">x{existingItem.quantity || 1}</span>
+              <span className="font-bold text-[#2563eb]">x{existingItem.quantity || 1}</span>
             </div>
 
             {existingItem.category && (
@@ -97,7 +97,7 @@ const ProductExistsModal: React.FC<ProductExistsModalProps> = ({
                   </svg>
                   Catégorie
                 </span>
-                <span className="font-semibold text-white">{existingItem.category}</span>
+                <span className="font-semibold text-slate-900">{existingItem.category}</span>
               </div>
             )}
 
@@ -132,7 +132,7 @@ const ProductExistsModal: React.FC<ProductExistsModalProps> = ({
         <div className="space-y-3">
           <button
             onClick={onAddToExisting}
-            className="w-full glass-button text-white font-semibold py-4 px-6 rounded-xl sm:rounded-2xl transition-all duration-200 flex items-center justify-center gap-2.5 text-sm sm:text-base touch-feedback min-h-[56px] shadow-lg hover:shadow-cyan-500/30"
+            className="w-full glass-button text-white font-semibold py-4 px-6 rounded-xl sm:rounded-2xl transition-all duration-200 flex items-center justify-center gap-2.5 text-sm sm:text-base touch-feedback min-h-[56px] shadow-lg hover:shadow-[rgba(104,255,154,0.35)]"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -142,7 +142,7 @@ const ProductExistsModal: React.FC<ProductExistsModalProps> = ({
 
           <button
             onClick={onModify}
-            className="w-full glass-input text-white font-semibold py-4 px-6 rounded-xl sm:rounded-2xl hover:bg-white/10 active:bg-white/5 transition-all duration-200 flex items-center justify-center gap-2.5 text-sm sm:text-base touch-feedback min-h-[56px] border-2 border-cyan-400/30"
+            className="w-full glass-input text-slate-900 font-semibold py-4 px-6 rounded-xl sm:rounded-2xl hover:bg-slate-100 active:bg-slate-50 transition-all duration-200 flex items-center justify-center gap-2.5 text-sm sm:text-base touch-feedback min-h-[56px] border-2 border-[#2563eb]/30"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -152,7 +152,7 @@ const ProductExistsModal: React.FC<ProductExistsModalProps> = ({
 
           <button
             onClick={onViewProduct}
-            className="w-full glass-input text-gray-300 font-medium py-3 px-6 rounded-xl hover:bg-white/5 active:bg-white/5 transition-all duration-200 flex items-center justify-center gap-2.5 text-sm touch-feedback"
+            className="w-full glass-input text-gray-300 font-medium py-3 px-6 rounded-xl hover:bg-slate-100 active:bg-slate-50 transition-all duration-200 flex items-center justify-center gap-2.5 text-sm touch-feedback"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -163,7 +163,7 @@ const ProductExistsModal: React.FC<ProductExistsModalProps> = ({
 
           <button
             onClick={onClose}
-            className="w-full text-gray-400 hover:text-white font-medium py-2 rounded-lg hover:bg-white/5 transition-all text-sm"
+            className="w-full text-gray-400 hover:text-slate-900 font-medium py-2 rounded-lg hover:bg-slate-100 transition-all text-sm"
           >
             Annuler
           </button>

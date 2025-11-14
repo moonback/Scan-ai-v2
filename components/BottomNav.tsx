@@ -62,40 +62,40 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, onViewChange, frigoC
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-header border-t border-white/10 safe-area-bottom z-40">
-      <div className={`flex items-center px-2 pb-2 pt-1 ${
-        navItems.length === 2 ? 'justify-center gap-12' : 'justify-around'
+      <div className={`flex items-center px-3 pb-3 pt-2 ${
+        navItems.length === 2 ? 'justify-center gap-10' : 'justify-around'
       }`}>
         {navItems.map((item) => (
           <button
             key={item.view}
             onClick={() => onViewChange(item.view)}
             className={`
-              relative flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl
-              transition-all duration-200 touch-feedback min-w-[64px] flex-1 max-w-[120px]
+              relative flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl
+              transition-all duration-200 touch-feedback min-w-[64px] flex-1 max-w-[120px] border border-transparent
               ${currentView === item.view 
-                ? 'text-cyan-400' 
-                : 'text-gray-400 hover:text-gray-300'
+                ? 'text-[#2563eb] border-white/10 bg-white/[0.03]'
+                : 'text-gray-400 hover:text-slate-900'
               }
             `}
           >
             {/* Active indicator */}
             {currentView === item.view && (
-              <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full animate-fade-in" />
+              <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-[#2563eb] to-[#38bdf8] rounded-full animate-fade-in" />
             )}
             
             {/* Icon container */}
             <div className={`
-              relative p-1 rounded-lg transition-all
+              relative p-1.5 rounded-xl transition-all
               ${currentView === item.view 
-                ? 'bg-cyan-500/20' 
-                : 'hover:bg-white/5'
+                ? 'bg-[#2563eb]/15 text-[#2563eb]' 
+                : 'hover:bg-slate-100'
               }
             `}>
               {item.icon}
               
               {/* Badge */}
               {item.showBadge && item.badgeCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] font-bold rounded-full border-2 border-gray-900 shadow-lg animate-scale-in">
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-gradient-to-r from-[#ff8f5c] to-[#ff5ca0] text-white text-[10px] font-bold rounded-full border-2 border-white shadow-lg animate-scale-in">
                   {item.badgeCount > 99 ? '99+' : item.badgeCount}
                 </span>
               )}
