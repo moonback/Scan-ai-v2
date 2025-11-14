@@ -73,11 +73,11 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
           onClose={() => setShowPriceHistory(false)}
         />
       )}
-    <div className="h-full overflow-y-auto smooth-scroll safe-area-top safe-area-bottom bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="h-full overflow-y-auto smooth-scroll safe-area-top safe-area-bottom bg-[var(--app-bg)]">
         <div className="min-h-full p-3 sm:p-4 pb-20 sm:pb-24">
         <div className="max-w-lg mx-auto glass-product rounded-2xl sm:rounded-3xl overflow-hidden animate-scale-in shadow-2xl">
             <div className="relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/50 to-transparent z-10 transition-opacity duration-300 group-hover:opacity-75"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-white/95 via-white/70 to-transparent z-10 transition-opacity duration-300 group-hover:opacity-90"></div>
                 <img 
                     className="w-full h-40 sm:h-56 object-cover transition-transform duration-700 group-hover:scale-110" 
                     src={product.image_url || 'https://picsum.photos/400/300'} 
@@ -95,7 +95,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
             </div>
             <div className="p-4 sm:p-5 space-y-3 sm:space-y-4">
                 <div>
-                    <div className="uppercase tracking-wider text-xs text-cyan-400 font-semibold mb-1">
+                    <div className="uppercase tracking-wider text-xs text-[#d4ff4c] font-semibold mb-1">
                         {product.brands || 'Marque inconnue'}
                     </div>
                     <h2 className="text-lg sm:text-xl leading-tight font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent mb-1">
@@ -113,10 +113,10 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
 
                 {/* Info Frigo - Prix et Magasin */}
                 {frigoItem && (frigoItem.price || frigoItem.store) && (
-                    <div className="glass-input border-2 border-cyan-400/30 rounded-xl p-3 space-y-2 animate-fade-in">
+                    <div className="glass-input border-2 border-[#d4ff4c]/30 rounded-xl p-3 space-y-2 animate-fade-in">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#d4ff4c] via-[#68ff9a] to-[#32d2a1] flex items-center justify-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                     </svg>
@@ -124,7 +124,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
                                 <div>
                                     <p className="text-xs text-gray-400">Dans votre frigo</p>
                                     {frigoItem.quantity && (
-                                        <p className="text-xs font-semibold text-cyan-400">Quantité: {frigoItem.quantity}</p>
+                                        <p className="text-xs font-semibold text-[#d4ff4c]">Quantité: {frigoItem.quantity}</p>
                                     )}
                                 </div>
                             </div>
@@ -171,7 +171,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
                         
                         {frigoItem.store && (
                             <div className="flex items-center gap-2 text-sm text-gray-300">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#d4ff4c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
                                 <span>{frigoItem.store}</span>
@@ -187,15 +187,15 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
                             onClick={() => setShowNutriments(!showNutriments)}
                             className="w-full flex items-center justify-between mb-2 group"
                         >
-                            <h3 className="text-sm sm:text-base font-semibold text-gray-200 flex items-center gap-1.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <h3 className="text-sm sm:text-base font-semibold text-slate-500 flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#d4ff4c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                                 Valeurs Nutritionnelles
                             </h3>
                             <svg 
                                 xmlns="http://www.w3.org/2000/svg" 
-                                className={`h-5 w-5 text-gray-400 group-hover:text-cyan-400 transition-all ${showNutriments ? 'rotate-180' : ''}`}
+                                className={`h-5 w-5 text-gray-400 group-hover:text-[#d4ff4c] transition-all ${showNutriments ? 'rotate-180' : ''}`}
                                 fill="none" 
                                 viewBox="0 0 24 24" 
                                 stroke="currentColor"
@@ -215,7 +215,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
                                                 <span className="text-base">{nutriment.icon}</span>
                                                 <span className="text-xs sm:text-sm text-gray-300">{nutriment.label}</span>
                                             </div>
-                                            <span className="text-xs sm:text-sm font-semibold text-white">
+                                            <span className="text-xs sm:text-sm font-semibold text-slate-900">
                                                 {typeof value === 'number' ? value.toFixed(1) : value} {nutriment.unit}
                                             </span>
                                         </div>
@@ -227,8 +227,8 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
                 )}
 
                 <div className="pt-3 border-t border-white/10">
-                    <h3 className="text-sm sm:text-base font-semibold text-gray-200 mb-2 flex items-center gap-1.5">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <h3 className="text-sm sm:text-base font-semibold text-slate-500 mb-2 flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#d4ff4c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         Ingrédients
@@ -244,7 +244,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
                     {onAddToFrigo && (
                         <button 
                             onClick={onAddToFrigo} 
-                            className="w-full glass-button text-white font-semibold py-3.5 px-4 rounded-xl sm:rounded-2xl flex items-center justify-center gap-2.5 text-sm sm:text-base touch-feedback min-h-[50px] shadow-lg hover:shadow-cyan-500/30"
+                            className="w-full glass-button text-white font-semibold py-3.5 px-4 rounded-xl sm:rounded-2xl flex items-center justify-center gap-2.5 text-sm sm:text-base touch-feedback min-h-[50px] shadow-lg hover:shadow-[rgba(104,255,154,0.45)]"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -254,7 +254,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
                     )}
                     <button 
                         onClick={onStartChat} 
-                        className="w-full glass-button text-white font-semibold py-3.5 px-4 rounded-xl sm:rounded-2xl flex items-center justify-center gap-2.5 text-sm sm:text-base touch-feedback min-h-[50px] shadow-lg hover:shadow-blue-500/30"
+                        className="w-full glass-button text-white font-semibold py-3.5 px-4 rounded-xl sm:rounded-2xl flex items-center justify-center gap-2.5 text-sm sm:text-base touch-feedback min-h-[50px] shadow-lg hover:shadow-[rgba(104,255,154,0.45)]"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z" />
@@ -263,7 +263,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
                     </button>
                     <button 
                         onClick={onScanAnother} 
-                        className="w-full glass-input text-white font-medium py-3 px-4 rounded-xl hover:bg-white/10 transition-all duration-200 flex items-center justify-center gap-2 text-sm touch-feedback min-h-[48px]"
+                        className="w-full glass-input text-slate-900 font-medium py-3 px-4 rounded-xl hover:bg-slate-100 transition-all duration-200 flex items-center justify-center gap-2 text-sm touch-feedback min-h-[48px]"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

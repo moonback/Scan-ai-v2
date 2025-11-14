@@ -203,7 +203,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col font-sans bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
+    <div className="h-screen w-screen flex flex-col font-sans bg-[var(--app-bg)] text-slate-900 overflow-hidden">
       <DLCNotifications />
       <Header 
         title={getHeaderTitle()} 
