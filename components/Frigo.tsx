@@ -29,6 +29,28 @@ const NutriScore: React.FC<{ score: string }> = ({ score }) => {
 
 type SortOption = 'date' | 'name' | 'price' | 'dlc';
 type ViewMode = 'grid' | 'list';
+interface PriceRange {
+  min?: number;
+  max?: number;
+}
+interface FiltersSidebarProps {
+  isOpen: boolean;
+  categories: string[];
+  selectedCategory: FrigoCategory | 'Tous';
+  onSelectCategory: (value: FrigoCategory | 'Tous') => void;
+  searchQuery: string;
+  onSearchQueryChange: (value: string) => void;
+  dlcFilter: 'all' | 'expired' | 'soon' | 'ok';
+  onDlcFilterChange: (value: 'all' | 'expired' | 'soon' | 'ok') => void;
+  priceFilter: PriceRange;
+  onPriceFilterChange: (value: PriceRange) => void;
+  sortBy: SortOption;
+  onSortByChange: (value: SortOption) => void;
+  viewMode: ViewMode;
+  onViewModeChange: (value: ViewMode) => void;
+  onResetFilters: () => void;
+  onClose: () => void;
+}
 const subtleButtonClass =
   'inline-flex items-center gap-1.5 rounded-2xl border border-white/40 bg-white/70 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-600 transition hover:border-white/70 hover:text-[var(--accent)]';
 const primaryButtonClass =
@@ -46,7 +68,7 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
   const [sortBy, setSortBy] = useState<SortOption>('date');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [dlcFilter, setDlcFilter] = useState<'all' | 'expired' | 'soon' | 'ok'>('all');
-  const [priceFilter, setPriceFilter] = useState<{ min?: number; max?: number }>({});
+  const [priceFilter, setPriceFilter] = useState<PriceRange>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
@@ -54,6 +76,15 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
   const [shareMessage, setShareMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isProcessingImport, setIsProcessingImport] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const closeSidebarIfMobile = () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      setIsSidebarOpen(false);
+    }
+  };
+  const handleCategorySelect = (value: FrigoCategory | 'Tous') => {
+    setSelectedCategory(value);
+    closeSidebarIfMobile();
+  };
 
   const getPriceVariation = (item: FrigoItem) => {
     if (!item.priceHistory || item.priceHistory.length < 2) return null;
@@ -561,230 +592,29 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
         )}
 
         {/* Sidebar avec recherche et filtres */}
-        <div
-          className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white/95 text-slate-700 shadow-[0_25px_45px_rgba(15,23,42,0.18)] z-50 transform transition-transform duration-300 ease-in-out sm:relative sm:transform-none sm:w-64 sm:h-auto sm:z-auto sm:bg-transparent sm:text-inherit sm:shadow-none sm:flex-shrink-0 ${
-            isSidebarOpen ? 'translate-x-0' : 'translate-x-full sm:translate-x-0'
-          }`}
-        >
-          <div className="h-full overflow-y-auto space-y-4 p-4 pt-6 pb-28 smooth-scroll sm:p-0 sm:pt-0 sm:pb-0">
-            {/* Header sidebar mobile */}
-            <div className="flex items-center justify-between mb-4 sm:hidden">
-              <h3 className="text-lg font-bold text-slate-900">Filtres & Recherche</h3>
-              <button
-                onClick={() => setIsSidebarOpen(false)}
-                className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
-                aria-label="Fermer"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Barre de recherche */}
-            <div>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Rechercher..."
-                  className="w-full glass-input text-slate-900 placeholder-gray-400 px-4 py-3 rounded-xl focus:ring-2 focus:ring-[#2563eb]/50 transition-all text-sm min-h-[44px]"
-                />
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  {searchQuery ? (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
-                      aria-label="Effacer la recherche"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Filtres par catégorie */}
-            {categories.length > 0 && (
-              <div>
-                <label className="text-xs font-semibold text-gray-400 mb-2 block">Catégorie</label>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => {
-                      setSelectedCategory('Tous');
-                      setIsSidebarOpen(false);
-                    }}
-                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all touch-feedback min-h-[36px] ${
-                      selectedCategory === 'Tous'
-                        ? 'glass-button text-white'
-                        : 'glass-input text-gray-300 hover:text-slate-900'
-                    }`}
-                  >
-                    Tous
-                  </button>
-                  {categories.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => {
-                        setSelectedCategory(cat);
-                        setIsSidebarOpen(false);
-                      }}
-                      className={`px-3 py-2 rounded-lg text-xs font-medium transition-all touch-feedback min-h-[36px] ${
-                        selectedCategory === cat
-                          ? 'glass-button text-white'
-                          : 'glass-input text-gray-300 hover:text-slate-900'
-                      }`}
-                    >
-                      {cat.split(' ')[0]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Filtre DLC */}
-            <div>
-              <label className="text-xs font-semibold text-gray-400 mb-2 block">Date de péremption</label>
-              <div className="relative">
-                <select
-                  value={dlcFilter}
-                  onChange={(e) => setDlcFilter(e.target.value as typeof dlcFilter)}
-                  className="w-full glass-input text-slate-900 px-4 py-2.5 rounded-xl text-sm font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#2563eb]/50 transition-all min-h-[44px] pr-10"
-                >
-                  <option value="all">Toutes les DLC</option>
-                  <option value="expired">Expirés</option>
-                  <option value="soon">Expirent bientôt</option>
-                  <option value="ok">OK</option>
-                </select>
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Filtre prix */}
-            <div>
-              <label className="text-xs font-semibold text-gray-400 mb-2 block">Prix (€)</label>
-              <div className="flex items-center gap-2 glass-input px-3 py-2.5 rounded-xl min-h-[44px]">
-                <input
-                  type="number"
-                  placeholder="Min"
-                  value={priceFilter.min || ''}
-                  onChange={(e) => setPriceFilter({ ...priceFilter, min: e.target.value ? parseFloat(e.target.value) : undefined })}
-                  className="flex-1 bg-transparent text-slate-900 text-sm placeholder-gray-400 focus:outline-none"
-                  min="0"
-                  step="0.01"
-                />
-                <span className="text-gray-400">-</span>
-                <input
-                  type="number"
-                  placeholder="Max"
-                  value={priceFilter.max || ''}
-                  onChange={(e) => setPriceFilter({ ...priceFilter, max: e.target.value ? parseFloat(e.target.value) : undefined })}
-                  className="flex-1 bg-transparent text-slate-900 text-sm placeholder-gray-400 focus:outline-none"
-                  min="0"
-                  step="0.01"
-                />
-                {(priceFilter.min !== undefined || priceFilter.max !== undefined) && (
-                  <button
-                    onClick={() => setPriceFilter({})}
-                    className="p-1 rounded hover:bg-slate-100 transition-colors"
-                    aria-label="Effacer filtre prix"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Tri */}
-            <div>
-              <label className="text-xs font-semibold text-gray-400 mb-2 block">Trier par</label>
-              <div className="relative">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="w-full glass-input text-slate-900 px-4 py-2.5 rounded-xl text-sm font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#2563eb]/50 transition-all min-h-[44px] pr-10"
-                >
-                  <option value="date">Plus récent</option>
-                  <option value="name">Nom (A-Z)</option>
-                  <option value="price">Prix (↓)</option>
-                  <option value="dlc">DLC (↑)</option>
-                </select>
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Toggle vue grille/liste */}
-            <div>
-              <label className="text-xs font-semibold text-gray-400 mb-2 block">Vue</label>
-              <div className="flex items-center gap-1 glass-input p-1 rounded-xl">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`flex-1 p-2 rounded-lg transition-all text-sm font-medium ${
-                    viewMode === 'grid'
-                      ? 'glass-button text-white'
-                      : 'text-gray-400 hover:text-slate-900'
-                  }`}
-                  aria-label="Vue grille"
-                >
-                  <div className="flex items-center justify-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
-                    <span>Grille</span>
-                  </div>
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`flex-1 p-2 rounded-lg transition-all text-sm font-medium ${
-                    viewMode === 'list'
-                      ? 'glass-button text-white'
-                      : 'text-gray-400 hover:text-slate-900'
-                  }`}
-                  aria-label="Vue liste"
-                >
-                  <div className="flex items-center justify-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                    <span>Liste</span>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            {/* Bouton réinitialiser filtres (mobile) */}
-            {(searchQuery || selectedCategory !== 'Tous' || dlcFilter !== 'all' || priceFilter.min !== undefined || priceFilter.max !== undefined) && (
-              <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setSelectedCategory('Tous');
-                  setDlcFilter('all');
-                  setPriceFilter({});
-                }}
-                className="w-full glass-input text-red-400 hover:text-red-300 font-medium py-3 rounded-xl transition-all text-sm sm:hidden"
-              >
-                Réinitialiser les filtres
-              </button>
-            )}
-          </div>
-        </div>
+        <FiltersSidebar
+          isOpen={isSidebarOpen}
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={handleCategorySelect}
+          searchQuery={searchQuery}
+          onSearchQueryChange={setSearchQuery}
+          dlcFilter={dlcFilter}
+          onDlcFilterChange={(value) => setDlcFilter(value as typeof dlcFilter)}
+          priceFilter={priceFilter}
+          onPriceFilterChange={setPriceFilter}
+          sortBy={sortBy}
+          onSortByChange={(value) => setSortBy(value as SortOption)}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          onResetFilters={() => {
+            setSearchQuery('');
+            setSelectedCategory('Tous');
+            setDlcFilter('all');
+            setPriceFilter({});
+          }}
+          onClose={() => setIsSidebarOpen(false)}
+        />
 
         {/* Contenu principal */}
         <div className="flex-1 min-w-0">
@@ -954,6 +784,188 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
       </div>
     </div>
   );
+
+function FiltersSidebar({
+  isOpen,
+  categories,
+  selectedCategory,
+  onSelectCategory,
+  searchQuery,
+  onSearchQueryChange,
+  dlcFilter,
+  onDlcFilterChange,
+  priceFilter,
+  onPriceFilterChange,
+  sortBy,
+  onSortByChange,
+  viewMode,
+  onViewModeChange,
+  onResetFilters,
+  onClose
+}: FiltersSidebarProps) {
+  const cardClass =
+    'rounded-2xl border border-slate-100 bg-white/90 p-3 shadow-sm sm:border-0 sm:bg-transparent sm:p-0';
+  return (
+    <aside
+      className={`fixed top-0 right-0 z-50 h-full w-80 max-w-[88vw] bg-white text-slate-700 shadow-[0_25px_45px_rgba(15,23,42,0.18)] transition-transform duration-300 ease-in-out sm:relative sm:z-auto sm:h-auto sm:w-64 sm:translate-x-0 sm:bg-transparent sm:text-inherit sm:shadow-none sm:flex-shrink-0 ${
+        isOpen ? 'translate-x-0' : 'translate-x-full sm:translate-x-0'
+      }`}
+    >
+      <div className="h-full overflow-y-auto space-y-5 px-4 pt-6 pb-28 smooth-scroll sm:space-y-4 sm:px-0 sm:pt-0 sm:pb-0">
+        <div className="flex items-center justify-between sm:hidden">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">Explorer</p>
+            <h3 className="text-lg font-bold text-slate-900">Filtres & recherche</h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-xl border border-slate-200/70 px-2 py-1 text-slate-500 transition hover:text-[var(--accent)]"
+            aria-label="Fermer les filtres"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div className={cardClass}>
+          <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Recherche</label>
+          <div className="relative mt-2">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => onSearchQueryChange(e.target.value)}
+              placeholder="Nom, marque..."
+              className="w-full rounded-2xl border border-slate-200/80 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+              {searchQuery ? (
+                <button onClick={() => onSearchQueryChange('')} aria-label="Effacer la recherche">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {categories.length > 0 && (
+          <div className={cardClass}>
+            <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Catégories</label>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                onClick={() => onSelectCategory('Tous')}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                  selectedCategory === 'Tous' ? 'bg-[var(--accent)] text-white shadow' : 'bg-slate-100 text-slate-600 hover:text-[var(--accent)]'
+                }`}
+              >
+                Tous
+              </button>
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => onSelectCategory(cat as FrigoCategory)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                    selectedCategory === cat ? 'bg-[var(--accent)] text-white shadow' : 'bg-slate-100 text-slate-600 hover:text-[var(--accent)]'
+                  }`}
+                >
+                  {cat.split(' ')[0]}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className={cardClass}>
+          <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Date de péremption</label>
+          <select
+            value={dlcFilter}
+            onChange={(e) => onDlcFilterChange(e.target.value as FiltersSidebarProps['dlcFilter'])}
+            className="mt-2 w-full rounded-2xl border border-slate-200/80 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+          >
+            <option value="all">Toutes les DLC</option>
+            <option value="expired">Expirés</option>
+            <option value="soon">Expire bientôt</option>
+            <option value="ok">OK</option>
+          </select>
+        </div>
+
+        <div className={cardClass}>
+          <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Prix (€)</label>
+          <div className="mt-2 flex items-center gap-2 rounded-2xl border border-slate-200/80 bg-white px-3 py-2.5">
+            <input
+              type="number"
+              placeholder="Min"
+              value={priceFilter.min ?? ''}
+              onChange={(e) => onPriceFilterChange({ ...priceFilter, min: e.target.value ? parseFloat(e.target.value) : undefined })}
+              className="w-full bg-transparent text-sm focus:outline-none"
+              min="0"
+              step="0.01"
+            />
+            <span className="text-slate-300">—</span>
+            <input
+              type="number"
+              placeholder="Max"
+              value={priceFilter.max ?? ''}
+              onChange={(e) => onPriceFilterChange({ ...priceFilter, max: e.target.value ? parseFloat(e.target.value) : undefined })}
+              className="w-full bg-transparent text-sm focus:outline-none"
+              min="0"
+              step="0.01"
+            />
+          </div>
+        </div>
+
+        <div className={cardClass}>
+          <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Tri</label>
+          <select
+            value={sortBy}
+            onChange={(e) => onSortByChange(e.target.value as SortOption)}
+            className="mt-2 w-full rounded-2xl border border-slate-200/80 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+          >
+            <option value="date">Plus récent</option>
+            <option value="name">Nom (A-Z)</option>
+            <option value="price">Prix décroissant</option>
+            <option value="dlc">DLC croissante</option>
+          </select>
+        </div>
+
+        <div className={cardClass}>
+          <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Vue</label>
+          <div className="mt-2 flex rounded-2xl border border-slate-200/80 bg-white p-1">
+            {(['grid', 'list'] as ViewMode[]).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => onViewModeChange(mode)}
+                className={`flex-1 rounded-2xl px-2 py-1.5 text-sm font-semibold transition ${
+                  viewMode === mode ? 'bg-[var(--accent)] text-white shadow' : 'text-slate-500'
+                }`}
+              >
+                {mode === 'grid' ? 'Grille' : 'Liste'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {(searchQuery || selectedCategory !== 'Tous' || dlcFilter !== 'all' || priceFilter.min !== undefined || priceFilter.max !== undefined) && (
+          <button
+            onClick={() => {
+              onResetFilters();
+              onClose();
+            }}
+            className="w-full rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-500 transition hover:bg-red-100 sm:hidden"
+          >
+            Réinitialiser les filtres
+          </button>
+        )}
+      </div>
+    </aside>
+  );
+}
 
   function renderProductCard(item: FrigoItem) {
     const dlcStatus = getDlcStatus(item);
