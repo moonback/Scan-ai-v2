@@ -562,11 +562,11 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
 
         {/* Sidebar avec recherche et filtres */}
         <div
-        className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-[rgba(5,6,8,0.95)] z-50 transform transition-transform duration-300 ease-in-out sm:relative sm:transform-none sm:w-64 sm:h-auto sm:z-auto sm:bg-transparent sm:flex-shrink-0 ${
+          className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white/95 text-slate-700 shadow-[0_25px_45px_rgba(15,23,42,0.18)] z-50 transform transition-transform duration-300 ease-in-out sm:relative sm:transform-none sm:w-64 sm:h-auto sm:z-auto sm:bg-transparent sm:text-inherit sm:shadow-none sm:flex-shrink-0 ${
             isSidebarOpen ? 'translate-x-0' : 'translate-x-full sm:translate-x-0'
           }`}
         >
-          <div className="h-full overflow-y-auto p-4 sm:p-0 space-y-4 smooth-scroll">
+          <div className="h-full overflow-y-auto space-y-4 p-4 pt-6 pb-28 smooth-scroll sm:p-0 sm:pt-0 sm:pb-0">
             {/* Header sidebar mobile */}
             <div className="flex items-center justify-between mb-4 sm:hidden">
               <h3 className="text-lg font-bold text-slate-900">Filtres & Recherche</h3>
