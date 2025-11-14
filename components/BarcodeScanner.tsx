@@ -48,28 +48,13 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, isLoading, erro
 
       <div className="safe-area-top safe-area-bottom flex h-full flex-col overflow-y-auto bg-transparent px-3 py-4 text-left sm:px-8 md:px-10">
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 animate-fade-in sm:gap-5">
-          <div className="hero-spotlight rounded-[26px] p-4 text-slate-800 shadow-inner sm:rounded-[30px] sm:p-5">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="glass-icon flex h-14 w-14 items-center justify-center rounded-2xl bg-white/70 shadow-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1v-2a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM4 12h16M12 4v16" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Assistant IA</p>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-900">Scanner un nouveau produit</h2>
-                <p className="text-sm text-slate-500">
-                  Capturez un code-barres ou saisissez-le pour analyser instantanément les informations clés.
-                </p>
-              </div>
-            </div>
-            
-          </div>
+          
 
           <div className="glass-card rounded-[26px] p-4 shadow-xl sm:rounded-[30px] sm:p-6">
             <div className="flex flex-col gap-5 sm:gap-6">
               <div className="flex flex-col gap-1">
                 <h3 className="text-xl font-semibold text-slate-900">Code-barres EAN-13</h3>
+                <p className="text-sm text-slate-500">Scannez un code-barres EAN-13 pour obtenir des informations sur le produit.</p>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-[1.2fr_0.8fr]">
