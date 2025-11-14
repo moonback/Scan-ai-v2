@@ -9,6 +9,8 @@ interface BarcodeScannerProps {
   error: string | null;
 }
 
+const chips = ['Mobile first', 'Temps réel', 'Sécurisé'];
+
 const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, isLoading, error }) => {
   const [barcode, setBarcode] = useState('');
   const [inputError, setInputError] = useState('');
@@ -16,22 +18,24 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, isLoading, erro
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Allow only digits
     if (/^\d*$/.test(value)) {
       setBarcode(value);
       if (inputError) setInputError('');
     }
   };
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (barcode.length !== 13) {
-      setInputError('Le code-barres EAN-13 doit contenir exactement 13 chiffres.');
-      return;
-    }
-    setInputError('');
-    onScan(barcode);
-  }, [barcode, onScan]);
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (barcode.length !== 13) {
+        setInputError('Le code-barres EAN-13 doit contenir exactement 13 chiffres.');
+        return;
+      }
+      setInputError('');
+      onScan(barcode);
+    },
+    [barcode, onScan]
+  );
 
   return (
     <>
@@ -46,70 +50,112 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, isLoading, erro
         />
       )}
 
-      <div className="safe-area-top safe-area-bottom flex h-full flex-col overflow-y-auto bg-transparent px-3 py-4 text-left sm:px-8 md:px-10">
-        <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 animate-fade-in sm:gap-5">
-          
-
-          <div className="glass-card rounded-[26px] p-4 shadow-xl sm:rounded-[30px] sm:p-6">
-            <div className="flex flex-col gap-5 sm:gap-6">
-              <div className="flex flex-col gap-1">
-                <h3 className="text-xl font-semibold text-slate-900">Code-barres EAN-13</h3>
-                <p className="text-sm text-slate-500">Scannez un code-barres EAN-13 pour obtenir des informations sur le produit.</p>
+      <div className="safe-area-top safe-area-bottom flex min-h-screen flex-col overflow-y-auto bg-gradient-to-b from-slate-50 via-white to-white px-4 py-6 text-left sm:px-6 md:px-8">
+        <div className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 pb-10">
+          <header className="animate-fade-in rounded-[28px] border border-white/60 bg-white/80 p-5 shadow-[0_25px_45px_rgba(15,23,42,0.08)] backdrop-blur">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#2563eb] via-[#38bdf8] to-[#0ea5e9] text-white shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h18M3 12h18M3 19h18" />
+                </svg>
               </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">Scanner</p>
+                <h1 className="text-2xl font-bold text-slate-900">Code-barres EAN-13</h1>
+              </div>
+            </div>
+            <p className="mt-3 text-sm text-slate-500 leading-relaxed">
+              Scannez avec votre caméra ou saisissez les chiffres pour retrouver instantanément les informations produit.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {chips.map((chip) => (
+                <span key={chip} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+                  {chip}
+                </span>
+              ))}
+            </div>
+          </header>
 
-              <div className="grid gap-3 sm:grid-cols-[1.2fr_0.8fr]">
+          <section className="space-y-5">
+            <div className="rounded-[30px] border border-white/60 bg-white/90 p-5 shadow-[0_35px_65px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-slate-400">Option rapide</p>
+                  <h2 className="text-lg font-semibold text-slate-900">Scanner avec la caméra</h2>
+                </div>
+
                 <button
                   type="button"
                   onClick={() => setShowCamera(true)}
-                  className="glass-button flex items-center justify-center gap-3 rounded-2xl py-4 text-base font-semibold"
+                  className="group flex w-full flex-col items-center gap-3 rounded-3xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-5 text-center shadow-inner transition hover:-translate-y-0.5 hover:border-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Scanner avec la caméra
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-lg transition group-hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold text-slate-900">Ouvrir la caméra</p>
+                    <p className="text-sm text-slate-500">Alignez le code dans le cadre pour une lecture immédiate.</p>
+                  </div>
                 </button>
 
-                
+                <div className="grid grid-cols-2 gap-2 text-xs text-slate-400">
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
+                    <p className="font-semibold text-slate-600">Astuce</p>
+                    <p>Nettoyez l’objectif pour optimiser la détection.</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
+                    <p className="font-semibold text-slate-600">Vie privée</p>
+                    <p>Aucune image n’est stockée.</p>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              <form 
-                onSubmit={handleSubmit} 
-                className="flex flex-col gap-3 sm:gap-4"
+            <div className="rounded-[30px] border border-white/60 bg-white/95 p-5 shadow-[0_35px_65px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+              <form
+                onSubmit={handleSubmit}
+                className="flex flex-col gap-4"
                 aria-label="Entrer un code-barres manuellement"
                 autoComplete="off"
                 spellCheck={false}
               >
-                <label 
-                  htmlFor="barcode-input"
-                  className="mb-1 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500"
-                >
-                  Saisie manuelle
-                </label>
-                <div className="relative">
-                  <input
-                    id="barcode-input"
-                    type="tel"
-                    inputMode="numeric"
-                    pattern="\d{13}"
-                    value={barcode}
-                    onChange={handleInputChange}
-                    placeholder="0000 0000 0000 0"
-                    maxLength={13}
-                    className="w-full glass-input text-center text-lg font-mono tracking-[0.4em] text-slate-900 placeholder:text-slate-400 sm:text-2xl sm:tracking-[0.55em] aria-[invalid='true']:ring-2 aria-[invalid='true']:ring-red-400"
-                    aria-invalid={!!inputError}
-                    aria-describedby={inputError ? "barcode-error" : undefined}
-                    autoFocus
-                  />
-                  <span className="stat-chip absolute right-3 top-1/2 -translate-y-1/2 rounded-full px-3 py-1 text-[11px] font-semibold text-slate-500 select-none" aria-live="polite">
-                    {barcode.length}/13
-                  </span>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-slate-400">Plan B</p>
+                  <h2 className="text-lg font-semibold text-slate-900">Saisie manuelle</h2>
+                </div>
+
+                <div className="rounded-3xl border border-slate-100 bg-slate-50/80 p-4">
+                  <label htmlFor="barcode-input" className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+                    Code-barres
+                  </label>
+                  <div className="relative mt-2">
+                    <input
+                      id="barcode-input"
+                      type="tel"
+                      inputMode="numeric"
+                      pattern="\d{13}"
+                      value={barcode}
+                      onChange={handleInputChange}
+                      placeholder="0000 0000 0000 0"
+                      maxLength={13}
+                      className="w-full rounded-2xl bg-white px-4 py-3 text-center text-xl font-mono tracking-[0.4em] text-slate-900 placeholder:text-slate-300 shadow-inner focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/60 sm:text-2xl sm:tracking-[0.6em] aria-[invalid='true']:ring-red-400"
+                      aria-invalid={!!inputError}
+                      aria-describedby={inputError ? 'barcode-error' : undefined}
+                      autoFocus
+                    />
+                    <span className="stat-chip absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 px-3 py-1 text-[11px] font-semibold text-slate-500 shadow" aria-live="polite">
+                      {barcode.length}/13
+                    </span>
+                  </div>
                 </div>
 
                 {inputError && (
                   <div
                     id="barcode-error"
-                    className="glass-error rounded-2xl p-3 text-sm text-red-500"
+                    className="rounded-2xl border border-red-100 bg-red-50 p-3 text-sm text-red-600"
                     role="alert"
                   >
                     <p className="flex items-center gap-2">
@@ -125,7 +171,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, isLoading, erro
                   type="submit"
                   disabled={isLoading || barcode.length !== 13}
                   aria-disabled={isLoading || barcode.length !== 13}
-                  className="glass-button flex items-center justify-center gap-3 rounded-2xl py-4 text-base font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:opacity-50"
+                  className="flex items-center justify-center gap-3 rounded-3xl bg-slate-900 py-4 text-base font-semibold text-white shadow-[0_15px_35px_rgba(15,23,42,0.3)] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-900 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {isLoading ? (
                     <>
@@ -141,20 +187,20 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, isLoading, erro
                     </>
                   )}
                 </button>
-              </form>
 
-              {error && (
-                <div className="glass-error rounded-2xl p-3 text-sm text-red-500">
-                  <p className="flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {error}
-                  </p>
-                </div>
-              )}
+                {error && (
+                  <div className="rounded-2xl border border-red-100 bg-red-50/80 p-3 text-sm text-red-600">
+                    <p className="flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {error}
+                    </p>
+                  </div>
+                )}
+              </form>
             </div>
-          </div>
+          </section>
         </div>
       </div>
     </>
