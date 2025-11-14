@@ -42,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({ title, showBack, onBack, showFrigo, onF
         ${scrolled ? 'shadow-[0_20px_45px_rgba(15,23,42,0.15)]' : 'shadow-none'}
       `}
     >
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-2 px-1 py-1.5 sm:px-2 sm:py-2">
+      <div className="mx-auto flex w-full max-w-8xl items-center justify-between gap-2 px-1 py-1.5 sm:px-2 sm:py-2">
         <div className="flex min-w-[52px] justify-start">
           {showBack && onBack && (
             <button

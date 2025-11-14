@@ -74,7 +74,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, onStartChat, o
         />
       )}
     <div className="h-full overflow-y-auto bg-transparent px-3 py-4 smooth-scroll safe-area-top safe-area-bottom sm:px-6 md:px-8">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 pb-24 sm:gap-5 sm:pb-28">
+      <div className="mx-auto flex w-full max-w-8xl flex-col gap-4 pb-24 sm:gap-5 sm:pb-28">
         <section className="grid gap-4 lg:grid-cols-[1.35fr_1fr] sm:gap-5">
           <div className="glass-product relative h-[260px] overflow-hidden rounded-[26px] shadow-[0_30px_70px_rgba(15,23,42,0.2)] sm:h-[320px] sm:rounded-[32px]">
             <img

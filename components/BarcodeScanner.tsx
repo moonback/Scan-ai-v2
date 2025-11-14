@@ -10,6 +10,25 @@ interface BarcodeScannerProps {
 }
 
 const chips = ['Mobile first', 'Temps réel', 'Sécurisé'];
+const desktopIndicators = [
+  { label: 'Caméra', value: '1080p', description: 'Flux optimisé' },
+  { label: 'Latence', value: '< 120 ms', description: 'Analyse locale' },
+  { label: 'Sécurité', value: 'Chiffré', description: 'Aucune donnée stockée' }
+];
+const desktopChecklist = [
+  {
+    title: 'Préparer',
+    tips: ['Essuyer le code-barres', 'Limiter les reflets', 'Stabiliser le produit']
+  },
+  {
+    title: 'Scanner',
+    tips: ['Positionner à 15 cm', 'Attendre la vibration', 'Recentrer si besoin']
+  },
+  {
+    title: 'Analyser',
+    tips: ['Comparer la nutrition', 'Consulter le prix', 'Voir les alertes DLC']
+  }
+];
 
 const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, isLoading, error }) => {
   const [barcode, setBarcode] = useState('');
@@ -51,8 +70,8 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, isLoading, erro
       )}
 
       <div className="safe-area-top safe-area-bottom flex min-h-screen flex-col overflow-y-auto bg-gradient-to-b from-slate-50 via-white to-white px-4 py-6 text-left sm:px-6 md:px-8">
-        <div className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 pb-10">
-          <header className="animate-fade-in rounded-[28px] border border-white/60 bg-white/80 p-5 shadow-[0_25px_45px_rgba(15,23,42,0.08)] backdrop-blur">
+        <div className="mx-auto flex w-full max-w-8xl flex-1 flex-col gap-6 pb-10">
+          <header className="animate-fade-in rounded-[28px] border border-white/60 bg-white/80 p-5 shadow-[0_25px_45px_rgba(15,23,42,0.08)] backdrop-blur lg:flex lg:items-center lg:justify-between lg:gap-6">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#2563eb] via-[#38bdf8] to-[#0ea5e9] text-white shadow-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -64,10 +83,10 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, isLoading, erro
                 <h1 className="text-2xl font-bold text-slate-900">Code-barres EAN-13</h1>
               </div>
             </div>
-            <p className="mt-3 text-sm text-slate-500 leading-relaxed">
-              Scannez avec votre caméra ou saisissez les chiffres pour retrouver instantanément les informations produit.
+            <p className="mt-3 text-sm text-slate-500 leading-relaxed lg:max-w-xl">
+              Scannez avec votre caméra ou saisissez les chiffres pour retrouver instantanément les informations produit. L’interface s’adapte automatiquement pour rester lisible, du mobile au bureau.
             </p>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2 lg:mt-0 lg:flex-shrink-0 lg:justify-end">
               {chips.map((chip) => (
                 <span key={chip} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
                   {chip}
@@ -76,7 +95,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, isLoading, erro
             </div>
           </header>
 
-          <section className="space-y-5">
+          <section className="space-y-5 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-6 lg:space-y-0">
             <div className="rounded-[30px] border border-white/60 bg-white/90 p-5 shadow-[0_35px_65px_rgba(15,23,42,0.08)] backdrop-blur-sm">
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1">
@@ -199,6 +218,41 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, isLoading, erro
                   </div>
                 )}
               </form>
+            </div>
+          </section>
+
+          <section className="hidden rounded-[34px] border border-white/70 bg-white/90 p-6 shadow-[0_45px_85px_rgba(15,23,42,0.08)] backdrop-blur-lg lg:block">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.5em] text-slate-400">Mode bureau</p>
+                <h3 className="text-xl font-semibold text-slate-900">Assistant détaillé</h3>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                {desktopIndicators.map((indicator) => (
+                  <div key={indicator.label} className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-right">
+                    <p className="text-[11px] uppercase tracking-[0.25em] text-slate-400">{indicator.label}</p>
+                    <p className="text-lg font-semibold text-slate-900">{indicator.value}</p>
+                    <p className="text-[11px] text-slate-500">{indicator.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              {desktopChecklist.map((section) => (
+                <div key={section.title} className="rounded-3xl border border-slate-100 bg-slate-50/80 p-4">
+                  <h4 className="mb-3 text-sm font-semibold text-slate-800">{section.title}</h4>
+                  <ul className="space-y-2 text-xs text-slate-500">
+                    {section.tips.map((tip) => (
+                      <li key={tip} className="flex items-start gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="mt-0.5 h-3.5 w-3.5 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>{tip}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           </section>
         </div>

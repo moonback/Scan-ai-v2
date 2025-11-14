@@ -224,7 +224,7 @@ const App: React.FC = () => {
         </div>
 
         <main className="flex-1 overflow-hidden px-2 pb-20 pt-3 sm:px-6 md:pb-10">
-          <div className="relative mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-[22px] border border-white/10 bg-white/80 shadow-[0_30px_70px_rgba(15,23,42,0.15)] backdrop-blur-[28px] sm:rounded-[32px]">
+          <div className="relative mx-auto flex h-full w-full max-w-8xl flex-col overflow-hidden rounded-[22px] border border-white/10 bg-white/80 shadow-[0_30px_70px_rgba(15,23,42,0.15)] backdrop-blur-[28px] sm:rounded-[32px]">
             {renderContent()}
           </div>
         </main>
