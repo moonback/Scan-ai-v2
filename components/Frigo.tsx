@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { type Product } from '../types';
 import { frigoService, type FrigoItem, type FrigoCategory } from '../services/frigoService';
 import Loader from './Loader';
@@ -49,6 +49,10 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
   const [detectedProducts, setDetectedProducts] = useState<DetectedProduct[]>([]);
   const [showProductSelection, setShowProductSelection] = useState(false);
   const [scanMetadata, setScanMetadata] = useState<{ store?: string; date?: string; totalAmount?: number } | undefined>();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importFeedback, setImportFeedback] = useState<string | null>(null);
+  const [shareFeedback, setShareFeedback] = useState<string | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
 
   const getPriceVariation = (item: FrigoItem) => {
     if (!item.priceHistory || item.priceHistory.length < 2) return null;
@@ -66,11 +70,106 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
     loadFrigo();
   }, []);
 
+  useEffect(() => {
+    if (!importFeedback && !shareFeedback) return;
+    const timer = setTimeout(() => {
+      setImportFeedback(null);
+      setShareFeedback(null);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [importFeedback, shareFeedback]);
+
   const loadFrigo = () => {
     setIsLoading(true);
     const frigoItems = frigoService.getAll();
     setItems(frigoItems);
     setIsLoading(false);
+  };
+
+  const downloadExport = (content: string, extension: 'json' | 'csv') => {
+    const mimeType = extension === 'json' ? 'application/json' : 'text/csv';
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const timestamp = new Date().toISOString().split('T')[0];
+    link.download = `nutriscan-frigo-${timestamp}.${extension}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExport = (format: 'json' | 'csv') => {
+    try {
+      const data = frigoService.exportData(format);
+      downloadExport(data, format);
+    } catch (error) {
+      console.error('Erreur export', error);
+      alert('Impossible de générer le fichier d’export.');
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setIsImporting(true);
+    setImportFeedback(null);
+    try {
+      const content = await file.text();
+      const isCsv = file.name.toLowerCase().endsWith('.csv');
+      const result = frigoService.importData(content, isCsv ? 'csv' : 'json');
+      setImportFeedback(`Import réussi : ${result.created} ajout(s), ${result.updated} mise(s) à jour, ${result.skipped} ignoré(s).`);
+      loadFrigo();
+      onFrigoChange?.();
+    } catch (error: any) {
+      console.error('Erreur import', error);
+      setImportFeedback(error?.message || 'Import impossible.');
+    } finally {
+      setIsImporting(false);
+      event.target.value = '';
+    }
+  };
+
+  const handleShareShoppingList = async () => {
+    if (items.length === 0) {
+      setShareFeedback('Votre frigo est vide : rien à partager.');
+      return;
+    }
+    const content = frigoService.buildShoppingList(items);
+    setShareFeedback(null);
+    try {
+      if (navigator && 'share' in navigator) {
+        await (navigator as any).share({
+          title: 'Liste de courses NutriScan',
+          text: content
+        });
+        setShareFeedback('Liste partagée via le système.');
+        return;
+      }
+    } catch (error: any) {
+      if (error?.name !== 'AbortError') {
+        console.warn('Partage système impossible, tentative presse-papiers.', error);
+      } else {
+        return;
+      }
+    }
+
+    try {
+      if (navigator && 'clipboard' in navigator && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(content);
+        setShareFeedback('Liste copiée dans le presse-papiers.');
+        return;
+      }
+    } catch (error) {
+      console.warn('Copie presse-papiers impossible', error);
+    }
+
+    alert(`Voici votre liste de courses :\n\n${content}`);
   };
 
   const categories = useMemo(() => frigoService.getCategories(), [items]);
@@ -221,6 +320,13 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
 
   return (
     <div className="p-4 sm:p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-y-auto h-full smooth-scroll safe-area-top safe-area-bottom">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json,.csv"
+        className="hidden"
+        onChange={handleImportFile}
+      />
       <div className="max-w-7xl mx-auto">
         {/* Alertes DLC */}
         {(expiredItems.length > 0 || expiringSoonItems.length > 0) && (
@@ -608,6 +714,57 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
               <FrigoStats items={items} />
             </div>
           )}
+
+          {/* Export / Import / Partage */}
+          <div className="mb-4 sm:mb-6">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => handleExport('json')}
+                className="glass-input text-white font-medium py-2.5 px-4 rounded-xl transition-all hover:bg-white/10 text-sm flex items-center gap-2 touch-feedback"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m0 0l3-3m-3 3l-3-3m9 5H6a2 2 0 01-2-2V7" />
+                </svg>
+                Export JSON
+              </button>
+              <button
+                onClick={() => handleExport('csv')}
+                className="glass-input text-white font-medium py-2.5 px-4 rounded-xl transition-all hover:bg-white/10 text-sm flex items-center gap-2 touch-feedback"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2h6v2m0 0h2a2 2 0 002-2v-3m-2 5H7a2 2 0 01-2-2v-3m0 0V7a2 2 0 012-2h2m8 5V7a2 2 0 00-2-2h-2" />
+                </svg>
+                Export CSV
+              </button>
+              <button
+                onClick={handleImportClick}
+                disabled={isImporting}
+                className={`glass-input font-medium py-2.5 px-4 rounded-xl transition-all text-sm flex items-center gap-2 touch-feedback ${
+                  isImporting ? 'text-gray-500 cursor-not-allowed' : 'text-white hover:bg-white/10'
+                }`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 16V8m0 0l-3 3m3-3l3 3m6 5a2 2 0 01-2 2H6a2 2 0 01-2-2V7" />
+                </svg>
+                {isImporting ? 'Import...' : 'Importer'}
+              </button>
+              <button
+                onClick={handleShareShoppingList}
+                className="glass-button text-white font-medium py-2.5 px-4 rounded-xl transition-all text-sm flex items-center gap-2 touch-feedback"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 8a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657A8 8 0 116.343 5.343" />
+                </svg>
+                Partager la liste
+              </button>
+            </div>
+            {(importFeedback || shareFeedback) && (
+              <p className="text-xs text-gray-400 mt-2">
+                {[importFeedback, shareFeedback].filter(Boolean).join(' • ')}
+              </p>
+            )}
+          </div>
 
           {/* Résultats */}
         {filteredItems.length === 0 ? (
