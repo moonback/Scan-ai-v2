@@ -29,7 +29,52 @@ export interface FrigoItem {
   priceHistory?: PriceHistoryEntry[]; // Historique des prix et magasins
 }
 
+export interface FrigoExitEntry {
+  id: string;
+  itemId: string;
+  productName: string;
+  brand: string;
+  quantity: number;
+  remainingQuantity: number;
+  reason?: string;
+  notes?: string;
+  date: string;
+}
+
+export interface FrigoExitMetadata {
+  reason?: string;
+  notes?: string;
+  date?: string;
+}
+
 const FRIGO_STORAGE_KEY = 'nutriscan_frigo';
+const FRIGO_EXIT_STORAGE_KEY = 'nutriscan_frigo_exit_history';
+
+export interface RecordExitResult {
+  success: boolean;
+  error?: string;
+  exit?: FrigoExitEntry;
+  removed?: boolean;
+  remainingQuantity?: number;
+}
+
+const readExitHistory = (): FrigoExitEntry[] => {
+  try {
+    const stored = localStorage.getItem(FRIGO_EXIT_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error('Erreur lecture historique sorties:', error);
+    return [];
+  }
+};
+
+const writeExitHistory = (entries: FrigoExitEntry[]) => {
+  try {
+    localStorage.setItem(FRIGO_EXIT_STORAGE_KEY, JSON.stringify(entries));
+  } catch (error) {
+    console.error('Erreur sauvegarde historique sorties:', error);
+  }
+};
 
 export const frigoService = {
   // Récupérer tous les produits du frigo
@@ -279,6 +324,60 @@ export const frigoService = {
     const percentage = (amount / previous.price) * 100;
     
     return { amount, percentage };
+  },
+
+  getExitHistory(limit?: number): FrigoExitEntry[] {
+    const entries = readExitHistory();
+    return typeof limit === 'number' ? entries.slice(0, Math.max(limit, 0)) : entries;
+  },
+
+  recordExit(id: string, quantity: number, metadata: FrigoExitMetadata = {}): RecordExitResult {
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      return { success: false, error: 'Quantité de sortie invalide.' };
+    }
+
+    const items = this.getAll();
+    const itemIndex = items.findIndex((entry) => entry.id === id);
+    if (itemIndex === -1) {
+      return { success: false, error: 'Produit introuvable dans le frigo.' };
+    }
+
+    const item = items[itemIndex];
+    const currentQuantity = item.quantity ?? 1;
+    if (quantity > currentQuantity) {
+      return { success: false, error: 'La quantité demandée dépasse le stock disponible.' };
+    }
+
+    const remainingQuantity = currentQuantity - quantity;
+    if (remainingQuantity <= 0) {
+      items.splice(itemIndex, 1);
+    } else {
+      items[itemIndex] = { ...item, quantity: remainingQuantity };
+    }
+    localStorage.setItem(FRIGO_STORAGE_KEY, JSON.stringify(items));
+
+    const exitEntry: FrigoExitEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      itemId: item.id,
+      productName: item.product.product_name,
+      brand: item.product.brands || 'Marque inconnue',
+      quantity,
+      remainingQuantity,
+      reason: metadata.reason?.trim() || undefined,
+      notes: metadata.notes?.trim() || undefined,
+      date: metadata.date && !Number.isNaN(Date.parse(metadata.date)) ? metadata.date : new Date().toISOString()
+    };
+
+    const history = readExitHistory();
+    history.unshift(exitEntry);
+    writeExitHistory(history.slice(0, 100));
+
+    return {
+      success: true,
+      exit: exitEntry,
+      removed: remainingQuantity <= 0,
+      remainingQuantity
+    };
   }
 };
 

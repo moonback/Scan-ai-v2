@@ -1,9 +1,16 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { type Product } from '../types';
-import { frigoService, type FrigoItem, type FrigoCategory, type PriceHistoryEntry } from '../services/frigoService';
+import {
+  frigoService,
+  type FrigoItem,
+  type FrigoCategory,
+  type PriceHistoryEntry,
+  type FrigoExitEntry,
+} from '../services/frigoService';
 import Loader from './Loader';
 import FrigoStats from './FrigoStats';
+import ProductExitModal from './ProductExitModal';
 
 interface FrigoProps {
   onProductSelect: (product: Product) => void;
@@ -32,6 +39,12 @@ type ViewMode = 'grid' | 'list';
 interface PriceRange {
   min?: number;
   max?: number;
+}
+interface ExitFormValues {
+  quantity: number;
+  reason?: string;
+  notes?: string;
+  date?: string;
 }
 interface FiltersSidebarProps {
   isOpen: boolean;
@@ -75,11 +88,19 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
   const [dataMessage, setDataMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [shareMessage, setShareMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isProcessingImport, setIsProcessingImport] = useState(false);
+  const [exitModalItem, setExitModalItem] = useState<FrigoItem | null>(null);
+  const [exitMessage, setExitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [exitHistory, setExitHistory] = useState<FrigoExitEntry[]>([]);
+  const [isRecordingExit, setIsRecordingExit] = useState(false);
+  const [exitModalError, setExitModalError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const closeSidebarIfMobile = () => {
     if (typeof window !== 'undefined' && window.innerWidth < 640) {
       setIsSidebarOpen(false);
     }
+  };
+  const refreshExitHistory = () => {
+    setExitHistory(frigoService.getExitHistory(20));
   };
   const handleCategorySelect = (value: FrigoCategory | 'Tous') => {
     setSelectedCategory(value);
@@ -100,18 +121,74 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
 
   useEffect(() => {
     loadFrigo();
+    refreshExitHistory();
   }, []);
 
   const loadFrigo = () => {
     setIsLoading(true);
     const frigoItems = frigoService.getAll();
     setItems(frigoItems);
+    refreshExitHistory();
     setIsLoading(false);
+  };
+  const handleOpenExitModal = (item: FrigoItem) => {
+    setExitModalItem(item);
+    setExitModalError(null);
+    setExitMessage(null);
+  };
+  const handleCloseExitModal = () => {
+    setExitModalItem(null);
+    setExitModalError(null);
+  };
+
+  const handleExitSubmit = (values: ExitFormValues) => {
+    if (!exitModalItem) return;
+    setIsRecordingExit(true);
+    setExitMessage(null);
+    setExitModalError(null);
+
+    const maxQuantity = exitModalItem.quantity ?? 1;
+    const safeQuantity = Math.max(1, Math.min(maxQuantity, Math.floor(values.quantity)));
+
+    const result = frigoService.recordExit(exitModalItem.id, safeQuantity, {
+      reason: values.reason,
+      notes: values.notes,
+      date: values.date
+    });
+
+    setIsRecordingExit(false);
+
+    if (!result.success) {
+      setExitModalError(result.error || 'Impossible d’enregistrer cette sortie.');
+      setExitMessage({ type: 'error', text: result.error || 'Impossible d’enregistrer cette sortie.' });
+      return;
+    }
+
+    setExitMessage({
+      type: 'success',
+      text: `Sortie enregistrée (${safeQuantity} unité${safeQuantity > 1 ? 's' : ''}).`
+    });
+    handleCloseExitModal();
+    loadFrigo();
+    onFrigoChange?.();
   };
 
   const categories = useMemo(() => frigoService.getCategories(), [items]);
   const expiredItems = useMemo(() => frigoService.getExpired(), [items]);
   const expiringSoonItems = useMemo(() => frigoService.getExpiringSoon(), [items]);
+  const latestExitForModal = exitModalItem
+    ? exitHistory.find((entry) => entry.itemId === exitModalItem.id) ?? null
+    : null;
+  const exitModalNode = exitModalItem ? (
+    <ProductExitModal
+      item={exitModalItem}
+      onClose={handleCloseExitModal}
+      onConfirm={handleExitSubmit}
+      isSubmitting={isRecordingExit}
+      error={exitModalError}
+      latestExit={latestExitForModal ?? undefined}
+    />
+  ) : null;
 
   const filteredItems = useMemo(() => {
     let filtered = items;
@@ -488,56 +565,64 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Loader />
-      </div>
+      <>
+        {exitModalNode}
+        <div className="flex items-center justify-center h-full">
+          <Loader />
+        </div>
+      </>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="h-full overflow-y-auto bg-transparent px-4 py-6 text-slate-900 smooth-scroll safe-area-top safe-area-bottom sm:px-6">
-        {renderHiddenFileInput()}
-        <div className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center text-center animate-fade-in">
-          <div className="mb-6 flex h-28 w-28 items-center justify-center rounded-[32px] bg-white/80 shadow-[0_25px_60px_rgba(15,23,42,0.18)] sm:h-32 sm:w-32">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-[var(--accent)] sm:h-20 sm:w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
-          </div>
-          <h2 className="mb-3 text-3xl font-semibold text-slate-900">Votre frigo est vide</h2>
-          <p className="mb-8 max-w-md text-base text-slate-500">
-            Scannez vos produits pour commencer à suivre vos stocks, vos prix et vos DLC en un clin d’œil.
-          </p>
-          <div className="flex w-full max-w-sm flex-col gap-3">
-            <button
-              onClick={onBack}
-              className="glass-button flex items-center justify-center gap-3 rounded-2xl py-4 text-base font-semibold"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+      <>
+        {exitModalNode}
+        <div className="h-full overflow-y-auto bg-transparent px-4 py-6 text-slate-900 smooth-scroll safe-area-top safe-area-bottom sm:px-6">
+          {renderHiddenFileInput()}
+          <div className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center text-center animate-fade-in">
+            <div className="mb-6 flex h-28 w-28 items-center justify-center rounded-[32px] bg-white/80 shadow-[0_25px_60px_rgba(15,23,42,0.18)] sm:h-32 sm:w-32">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-[var(--accent)] sm:h-20 sm:w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
-              Scanner un produit
-            </button>
-            <button
-              onClick={handleImportClick}
-              className="rounded-2xl border border-white/40 bg-white/80 px-6 py-4 text-base font-semibold text-slate-700 transition hover:bg-white"
-              disabled={isProcessingImport}
-            >
-              {isProcessingImport ? 'Import en cours…' : 'Importer mes données'}
-            </button>
-            {dataMessage && (
-              <p className={`text-sm ${dataMessage.type === 'success' ? 'text-green-500' : 'text-red-500'}`}>
-                {dataMessage.text}
-              </p>
-            )}
+            </div>
+            <h2 className="mb-3 text-3xl font-semibold text-slate-900">Votre frigo est vide</h2>
+            <p className="mb-8 max-w-md text-base text-slate-500">
+              Scannez vos produits pour commencer à suivre vos stocks, vos prix et vos DLC en un clin d’œil.
+            </p>
+            <div className="flex w-full max-w-sm flex-col gap-3">
+              <button
+                onClick={onBack}
+                className="glass-button flex items-center justify-center gap-3 rounded-2xl py-4 text-base font-semibold"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                </svg>
+                Scanner un produit
+              </button>
+              <button
+                onClick={handleImportClick}
+                className="rounded-2xl border border-white/40 bg-white/80 px-6 py-4 text-base font-semibold text-slate-700 transition hover:bg-white"
+                disabled={isProcessingImport}
+              >
+                {isProcessingImport ? 'Import en cours…' : 'Importer mes données'}
+              </button>
+              {dataMessage && (
+                <p className={`text-sm ${dataMessage.type === 'success' ? 'text-green-500' : 'text-red-500'}`}>
+                  {dataMessage.text}
+                </p>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-transparent px-3 py-4 text-slate-900 smooth-scroll safe-area-top safe-area-bottom sm:px-6 sm:py-6">
+    <>
+      {exitModalNode}
+      <div className="h-full overflow-y-auto bg-transparent px-3 py-4 text-slate-900 smooth-scroll safe-area-top safe-area-bottom sm:px-6 sm:py-6">
       <div className="mx-auto max-w-7xl">
         {renderHiddenFileInput()}
         {/* Alertes DLC */}
@@ -726,13 +811,18 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
                     Partager
                   </button>
                 </div>
-                {(dataMessage || shareMessage) && (
+                {(dataMessage || shareMessage || exitMessage) && (
                   <div className="text-xs text-gray-400">
                     {dataMessage && (
                       <p className={dataMessage.type === 'success' ? 'text-green-400' : 'text-red-400'}>{dataMessage.text}</p>
                     )}
                     {shareMessage && (
                       <p className={shareMessage.type === 'success' ? 'text-[#60a5fa]' : 'text-red-400'}>{shareMessage.text}</p>
+                    )}
+                    {exitMessage && (
+                      <p className={exitMessage.type === 'success' ? 'text-[#22c55e]' : 'text-red-400'}>
+                        {exitMessage.text}
+                      </p>
                     )}
                   </div>
                 )}
@@ -744,6 +834,42 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
           {showStats && items.length > 0 && (
             <div className="mb-4 sm:mb-6 animate-fade-in">
               <FrigoStats items={items} />
+            </div>
+          )}
+
+          {exitHistory.length > 0 && (
+            <div className="mb-4 sm:mb-5 animate-fade-in">
+              <div className="glass-card rounded-[26px] p-4 sm:p-5 shadow-xl border border-white/30">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-slate-400">Historique</p>
+                    <h3 className="text-base font-semibold text-slate-900">Dernières sorties</h3>
+                  </div>
+                  <button
+                    onClick={refreshExitHistory}
+                    className="rounded-2xl border border-white/50 bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:text-[var(--accent)]"
+                  >
+                    Actualiser
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {exitHistory.slice(0, 5).map((entry) => (
+                    <div key={entry.id} className="flex items-center justify-between rounded-2xl border border-white/40 bg-white/80 px-3 py-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-slate-900">{entry.productName}</p>
+                        <p className="truncate text-xs text-slate-500">
+                          {entry.brand} · {new Date(entry.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                        </p>
+                        {entry.reason && <p className="text-xs text-slate-400">Motif: {entry.reason}</p>}
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-red-500">- {entry.quantity}</p>
+                        <p className="text-[11px] text-slate-500">reste {Math.max(0, entry.remainingQuantity)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
@@ -779,10 +905,11 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
             )}
           </>
         )}
+          </div>
         </div>
       </div>
-      </div>
     </div>
+    </>
   );
 
 function FiltersSidebar({
@@ -1101,6 +1228,18 @@ function FiltersSidebar({
                     </div>
                   )}
                 </div>
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleOpenExitModal(item);
+                    }}
+                    className="w-full rounded-2xl border border-slate-200/80 bg-white/80 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:text-[var(--accent)]"
+                  >
+                    Enregistrer une sortie
+                  </button>
+                </div>
               </div>
             </div>
             );
@@ -1224,6 +1363,18 @@ function FiltersSidebar({
                   DLC: {new Date(item.dlc).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                 </div>
               )}
+            </div>
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleOpenExitModal(item);
+                }}
+                className="w-full rounded-2xl border border-slate-200/80 bg-white/80 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:text-[var(--accent)]"
+              >
+                Enregistrer une sortie
+              </button>
             </div>
           </div>
         </div>
