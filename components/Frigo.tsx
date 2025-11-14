@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { type Product } from '../types';
-import { frigoService, type FrigoItem, type FrigoCategory } from '../services/frigoService';
+import { frigoService, type FrigoItem, type FrigoCategory, type PriceHistoryEntry } from '../services/frigoService';
 import Loader from './Loader';
 import FrigoStats from './FrigoStats';
 
@@ -29,6 +29,14 @@ const NutriScore: React.FC<{ score: string }> = ({ score }) => {
 
 type SortOption = 'date' | 'name' | 'price' | 'dlc';
 type ViewMode = 'grid' | 'list';
+const subtleButtonClass =
+  'inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs sm:text-sm text-gray-200 transition-colors hover:border-cyan-400/40 hover:text-white';
+const primaryButtonClass =
+  'inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-cyan-500/80 via-blue-500/80 to-cyan-500/80 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-cyan-900/30 hover:from-cyan-400 hover:to-blue-500';
+const iconPillClass =
+  'h-10 w-10 sm:h-11 sm:w-11 rounded-full border border-white/10 bg-white/5 text-gray-300 flex items-center justify-center transition hover:border-cyan-400/40 hover:text-white';
+const overlayChipClass =
+  'px-2 py-0.5 rounded-lg border border-white/15 bg-black/30 backdrop-blur text-[10px] font-semibold text-white/90';
 
 const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange }) => {
   const [items, setItems] = useState<FrigoItem[]>([]);
@@ -41,6 +49,11 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
   const [priceFilter, setPriceFilter] = useState<{ min?: number; max?: number }>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showQuickActions, setShowQuickActions] = useState(false);
+  const [dataMessage, setDataMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [shareMessage, setShareMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isProcessingImport, setIsProcessingImport] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getPriceVariation = (item: FrigoItem) => {
     if (!item.priceHistory || item.priceHistory.length < 2) return null;
@@ -143,6 +156,288 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
     if (diffDays <= 3) return { type: 'soon', days: diffDays };
     return { type: 'ok', days: diffDays };
   };
+  const renderHiddenFileInput = () => (
+    <input
+      ref={fileInputRef}
+      type="file"
+      accept="application/json,.json"
+      className="hidden"
+      onChange={handleFileImport}
+    />
+  );
+
+  const generateItemId = () => {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+      return (crypto as Crypto).randomUUID();
+    }
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+  };
+
+  const createProductKey = (item: FrigoItem) => {
+    const brand = item.product.brands || 'no-brand';
+    return `${item.product.product_name}|${brand}`.toLowerCase();
+  };
+
+  const mergeFrigoItems = (base: FrigoItem[], incoming: FrigoItem[]) => {
+    const map = new Map<string, FrigoItem>();
+    base.forEach(item => map.set(createProductKey(item), item));
+    incoming.forEach(item => {
+      const key = createProductKey(item);
+      if (map.has(key)) {
+        map.set(key, { ...map.get(key)!, ...item });
+      } else {
+        map.set(key, item);
+      }
+    });
+    return Array.from(map.values());
+  };
+
+  const sanitizeProduct = (rawProduct: Partial<Product> | null | undefined): Product | null => {
+    if (!rawProduct || typeof rawProduct !== 'object' || !rawProduct.product_name) {
+      return null;
+    }
+    return {
+      product_name: rawProduct.product_name,
+      image_url: rawProduct.image_url || '',
+      brands: rawProduct.brands || 'Marque inconnue',
+      ingredients_text_with_allergens: rawProduct.ingredients_text_with_allergens || '',
+      nutriments: rawProduct.nutriments || {},
+      quantity: rawProduct.quantity || '',
+      nutriscore_grade: rawProduct.nutriscore_grade || ''
+    };
+  };
+
+  const normalizeImportedItems = (raw: unknown): FrigoItem[] => {
+    if (!Array.isArray(raw)) return [];
+
+    return raw
+      .map((entry): FrigoItem | null => {
+        if (!entry || typeof entry !== 'object') return null;
+        const casted = entry as Partial<FrigoItem> & { product?: Partial<Product> };
+        const product = sanitizeProduct(casted.product);
+        if (!product) return null;
+
+        const addedAt = casted.addedAt && !Number.isNaN(Date.parse(casted.addedAt))
+          ? casted.addedAt
+          : new Date().toISOString();
+        const dlc = casted.dlc && !Number.isNaN(Date.parse(casted.dlc)) ? casted.dlc : undefined;
+
+        const priceHistory = Array.isArray(casted.priceHistory)
+          ? casted.priceHistory
+              .map((historyEntry) => {
+                if (!historyEntry || typeof historyEntry !== 'object') return null;
+                const { price, store, date } = historyEntry as PriceHistoryEntry;
+                if (typeof price !== 'number' || !store || !date || Number.isNaN(Date.parse(date))) {
+                  return null;
+                }
+                return { price, store, date };
+              })
+              .filter(Boolean) as PriceHistoryEntry[]
+          : undefined;
+
+        const sanitizedItem: FrigoItem = {
+          id: typeof casted.id === 'string' ? casted.id : generateItemId(),
+          product,
+          addedAt,
+          quantity: typeof casted.quantity === 'number' && casted.quantity > 0 ? casted.quantity : 1,
+          category: casted.category,
+          dlc,
+          price: typeof casted.price === 'number' ? casted.price : undefined,
+          store: typeof casted.store === 'string' ? casted.store : undefined,
+          priceHistory: priceHistory && priceHistory.length > 0 ? priceHistory : undefined
+        };
+        return sanitizedItem;
+      })
+      .filter((item): item is FrigoItem => item !== null);
+  };
+
+  const downloadFile = (content: string, fileName: string, mimeType: string) => {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const buildCsvContent = (data: FrigoItem[]) => {
+    const headers = [
+      'Nom',
+      'Marque',
+      'Quantité',
+      'Catégorie',
+      'DLC',
+      'Prix (EUR)',
+      'Magasin',
+      'Ajouté le',
+      'NutriScore',
+      'Commentaires'
+    ];
+
+    const rows = data.map(item => {
+      const dlc = item.dlc ? new Date(item.dlc).toLocaleDateString('fr-FR') : '';
+      const addedAt = new Date(item.addedAt).toLocaleDateString('fr-FR');
+      return [
+        item.product.product_name,
+        item.product.brands,
+        item.quantity ?? 1,
+        item.category ?? '',
+        dlc,
+        item.price !== undefined ? item.price.toFixed(2) : '',
+        item.store ?? '',
+        addedAt,
+        item.product.nutriscore_grade?.toUpperCase() ?? '',
+        item.priceHistory && item.priceHistory.length > 0 ? 'Historique prix inclus' : ''
+      ];
+    });
+
+    const allRows = [headers, ...rows];
+    return allRows
+      .map(row =>
+        row
+          .map(value => {
+            const safe = value === null || value === undefined ? '' : String(value);
+            return `"${safe.replace(/"/g, '""')}"`;
+          })
+          .join(';')
+      )
+      .join('\r\n');
+  };
+
+  const handleExport = (format: 'json' | 'csv') => {
+    if (items.length === 0) {
+      setDataMessage({ type: 'error', text: 'Votre frigo est vide. Ajoutez des produits avant d’exporter.' });
+      return;
+    }
+
+    const timestamp = new Date().toISOString().split('T')[0];
+    if (format === 'json') {
+      downloadFile(JSON.stringify(items, null, 2), `frigo-${timestamp}.json`, 'application/json');
+    } else {
+      downloadFile(buildCsvContent(items), `frigo-${timestamp}.csv`, 'text/csv;charset=utf-8;');
+    }
+    setDataMessage({ type: 'success', text: `Export ${format.toUpperCase()} prêt au téléchargement.` });
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsProcessingImport(true);
+    setDataMessage(null);
+
+    try {
+      const content = await file.text();
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(content);
+      } catch (error) {
+        throw new Error('Le fichier sélectionné n’est pas un JSON valide.');
+      }
+
+      const normalized = normalizeImportedItems(parsed);
+      if (normalized.length === 0) {
+        throw new Error('Aucun produit exploitable n’a été trouvé dans ce fichier.');
+      }
+
+      let updatedItems = normalized;
+      if (items.length > 0) {
+        const shouldMerge = window.confirm(
+          'Souhaitez-vous fusionner ces données avec votre frigo actuel ?\nOK = fusionner, Annuler = remplacer.'
+        );
+        updatedItems = shouldMerge ? mergeFrigoItems(items, normalized) : normalized;
+      }
+
+      const saved = frigoService.setAll(updatedItems);
+      if (!saved) {
+        throw new Error('Impossible d’enregistrer les nouveaux produits dans le frigo.');
+      }
+
+      setItems(updatedItems);
+      setDataMessage({ type: 'success', text: `${normalized.length} produit(s) importé(s) avec succès.` });
+      onFrigoChange?.();
+    } catch (error) {
+      console.error('Erreur import frigo', error);
+      const message = error instanceof Error ? error.message : 'Import impossible. Réessayez avec un autre fichier.';
+      setDataMessage({ type: 'error', text: message });
+    } finally {
+      setIsProcessingImport(false);
+      if (event.target) {
+        event.target.value = '';
+      }
+    }
+  };
+
+  const getShoppingCandidates = () => {
+    const candidates = items.filter(item => {
+      const lowQuantity = !item.quantity || item.quantity <= 1;
+      const dlcStatus = getDlcStatus(item);
+      const riskyDlc = dlcStatus && (dlcStatus.type === 'expired' || dlcStatus.type === 'soon');
+      return lowQuantity || riskyDlc;
+    });
+    return candidates.length > 0 ? candidates : items;
+  };
+
+  const buildShoppingListText = (list: FrigoItem[]) => {
+    const header = `Liste de courses NutriScan (${new Date().toLocaleDateString('fr-FR')})`;
+    const lines = list.map(item => {
+      const qty = item.quantity ?? 1;
+      const category = item.category ? ` – ${item.category}` : '';
+      const dlc = item.dlc ? ` – DLC ${new Date(item.dlc).toLocaleDateString('fr-FR')}` : '';
+      return `• ${item.product.product_name} (x${qty})${category}${dlc}`;
+    });
+    return [header, '', ...lines].join('\n');
+  };
+
+  const handleShareShoppingList = async () => {
+    if (items.length === 0) {
+      setShareMessage({ type: 'error', text: 'Ajoutez des produits avant de partager votre liste.' });
+      return;
+    }
+
+    const candidates = getShoppingCandidates();
+    const text = buildShoppingListText(candidates);
+
+    try {
+      if (typeof navigator !== 'undefined') {
+        const nav = navigator as Navigator & {
+          share?: (data?: ShareData) => Promise<void>;
+        };
+        if (nav.share) {
+          await nav.share({
+            title: 'Liste de courses NutriScan',
+            text
+          });
+          setShareMessage({ type: 'success', text: 'Liste partagée via le menu de votre appareil.' });
+          return;
+        }
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+          setShareMessage({ type: 'success', text: 'Liste copiée dans le presse-papiers.' });
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Erreur partage liste', error);
+      setShareMessage({
+        type: 'error',
+        text: 'Impossible de partager automatiquement. Un téléchargement va démarrer.'
+      });
+    }
+
+    downloadFile(
+      text,
+      `liste-courses-${new Date().toISOString().split('T')[0]}.txt`,
+      'text/plain;charset=utf-8;'
+    );
+  };
 
   const handleRemove = (id: string) => {
     if (window.confirm('Voulez-vous retirer ce produit du frigo ?')) {
@@ -171,6 +466,7 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
   if (items.length === 0) {
     return (
       <div className="p-4 sm:p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-y-auto h-full smooth-scroll safe-area-top safe-area-bottom">
+        {renderHiddenFileInput()}
         <div className="max-w-2xl mx-auto flex flex-col items-center justify-center h-full text-center animate-fade-in">
           <div className="w-28 h-28 sm:w-32 sm:h-32 glass-icon rounded-3xl flex items-center justify-center mb-6 shadow-2xl animate-pulse-slow">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 sm:h-20 sm:w-20 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -183,15 +479,32 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
           <p className="text-gray-400 mb-8 text-base sm:text-lg max-w-md mx-auto leading-relaxed">
             Scannez des produits et ajoutez-les à votre frigo virtuel pour les retrouver facilement !
           </p>
-          <button
-            onClick={onBack}
-            className="glass-button text-white font-semibold py-4 sm:py-5 px-8 sm:px-10 rounded-xl sm:rounded-2xl transition-all duration-200 flex items-center gap-3 text-base sm:text-lg touch-feedback min-h-[56px] shadow-xl"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-            </svg>
-            Scanner un Produit
-          </button>
+          <div className="flex flex-col gap-3 w-full max-w-sm">
+            <button
+              onClick={onBack}
+              className="glass-button text-white font-semibold py-4 sm:py-5 px-8 sm:px-10 rounded-xl sm:rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 text-base sm:text-lg touch-feedback min-h-[56px] shadow-xl"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+              </svg>
+              Scanner un Produit
+            </button>
+            <button
+              onClick={handleImportClick}
+              className="glass-input text-white font-semibold py-4 sm:py-5 px-6 rounded-xl sm:rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 text-base sm:text-lg touch-feedback min-h-[56px]"
+              disabled={isProcessingImport}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6M20 4l-6 6M4 20l6-6" />
+              </svg>
+              {isProcessingImport ? 'Import en cours...' : 'Importer mes données'}
+            </button>
+            {dataMessage && (
+              <p className={`text-sm ${dataMessage.type === 'success' ? 'text-green-400' : 'text-red-400'}`}>
+                {dataMessage.text}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -200,6 +513,7 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
   return (
     <div className="p-4 sm:p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-y-auto h-full smooth-scroll safe-area-top safe-area-bottom">
       <div className="max-w-7xl mx-auto">
+        {renderHiddenFileInput()}
         {/* Alertes DLC */}
         {(expiredItems.length > 0 || expiringSoonItems.length > 0) && (
           <div className="mb-3 sm:mb-4 space-y-2">
@@ -480,44 +794,126 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
         {/* Contenu principal */}
         <div className="flex-1 min-w-0">
           {/* Header avec statistiques */}
-          <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="mb-4 sm:mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex-1 min-w-0">
-              <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-500 bg-clip-text text-transparent flex items-center gap-2.5 sm:gap-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-7 sm:w-7 text-cyan-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
+              {/* <h2 className="text-xl sm:text-2xl font-semibold text-white flex items-center gap-2.5 sm:gap-3">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-cyan-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                </span>
                 <span className="truncate">Mon Frigo ({items.length} {items.length > 1 ? 'produits' : 'produit'})</span>
-              </h2>
+              </h2> */}
+              <p className="mt-1 text-sm text-gray-400 hidden sm:block">Vue d’ensemble épurée de vos produits et actions rapides.</p>
             </div>
             {items.length > 0 && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 sm:gap-2.5">
+                <button
+                  onClick={() => setIsSidebarOpen(true)}
+                  className={`${iconPillClass} ${isSidebarOpen ? 'border-cyan-400/50 text-white' : ''}`}
+                  aria-label="Ouvrir les filtres"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M8 12h8m-5 6h2" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                  className={iconPillClass}
+                  aria-label="Changer de vue"
+                >
+                  {viewMode === 'grid' ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zm-10 8a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                  )}
+                </button>
+                <button
+                  onClick={() => setShowQuickActions(!showQuickActions)}
+                  className={`${iconPillClass} ${showQuickActions ? 'border-cyan-400/50 text-white' : ''}`}
+                  aria-label={showQuickActions ? 'Masquer les actions rapides' : 'Afficher les actions rapides'}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
+                  </svg>
+                </button>
                 <button
                   onClick={() => setShowStats(!showStats)}
-                  className={`glass-input font-medium py-3 px-4 sm:px-5 rounded-xl transition-all duration-200 text-sm flex items-center gap-2 whitespace-nowrap touch-feedback min-h-[48px] ${
-                    showStats 
-                      ? 'text-cyan-400 bg-cyan-500/20' 
-                      : 'text-gray-300 hover:text-white'
-                  }`}
+                  className={`${iconPillClass} ${showStats ? 'border-cyan-400/50 text-white' : ''}`}
                   aria-label={showStats ? "Masquer les statistiques" : "Afficher les statistiques"}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2M5 21h14" />
                   </svg>
-                  <span className="hidden sm:inline">Stats</span>
                 </button>
                 <button
                   onClick={handleClearAll}
-                  className="glass-input text-red-400 hover:text-red-300 font-medium py-3 px-4 sm:px-5 rounded-xl transition-all duration-200 text-sm flex items-center gap-2 whitespace-nowrap touch-feedback min-h-[48px]"
+                  className={`${subtleButtonClass} border-red-500/30 text-red-300 hover:border-red-400/60 hover:text-red-200`}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
-                  <span className="hidden sm:inline">Vider le frigo</span>
-                  <span className="sm:hidden">Vider</span>
+                  <span className="hidden sm:inline">Vider</span>
                 </button>
               </div>
             )}
           </div>
+
+          {/* Barre d’actions discrète */}
+          {showQuickActions && (
+            <div className="mb-4 sm:mb-6 rounded-2xl border border-white/5 bg-white/[0.03] p-3 sm:p-4 animate-fade-in">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-medium text-gray-200">Actions rapides</p>
+                  <span className="text-xs text-gray-500 hidden sm:inline">Export, import & partage</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button onClick={() => handleExport('json')} className={subtleButtonClass}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 4v11" />
+                    </svg>
+                    JSON
+                  </button>
+                  <button onClick={() => handleExport('csv')} className={subtleButtonClass}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 4h13M8 9h13M8 14h13M8 19h13M3 4h.01M3 9h.01M3 14h.01M3 19h.01" />
+                    </svg>
+                    CSV
+                  </button>
+                  <button
+                    onClick={handleImportClick}
+                    className={`${subtleButtonClass} ${isProcessingImport ? 'opacity-70 pointer-events-none' : ''}`}
+                    disabled={isProcessingImport}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M20 8v6a4 4 0 01-4 4H8m8-10l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    {isProcessingImport ? 'Import…' : 'Importer'}
+                  </button>
+                  <button onClick={handleShareShoppingList} className={primaryButtonClass}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4m0 0L8 6m4-4v14" />
+                    </svg>
+                    Partager
+                  </button>
+                </div>
+                {(dataMessage || shareMessage) && (
+                  <div className="text-xs text-gray-400">
+                    {dataMessage && (
+                      <p className={dataMessage.type === 'success' ? 'text-green-400' : 'text-red-400'}>{dataMessage.text}</p>
+                    )}
+                    {shareMessage && (
+                      <p className={shareMessage.type === 'success' ? 'text-cyan-300' : 'text-red-400'}>{shareMessage.text}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Statistiques */}
           {showStats && items.length > 0 && (
@@ -569,7 +965,7 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
     return (
       <div
         key={item.id}
-        className="glass-product rounded-2xl sm:rounded-3xl overflow-hidden transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer touch-feedback shadow-lg"
+        className="rounded-2xl sm:rounded-3xl overflow-hidden border border-white/5 bg-white/[0.04] backdrop-blur-sm transition-all duration-300 hover:border-cyan-400/40 cursor-pointer touch-feedback"
         onClick={() => onProductSelect(item.product)}
       >
               <div className="relative">
@@ -587,17 +983,17 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
                   </div>
                 )}
                 {item.quantity && item.quantity > 1 && (
-                  <div className="absolute top-1.5 sm:top-2 left-1.5 sm:left-2 glass-icon px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg">
-                    <span className="text-xs font-semibold text-cyan-400">x{item.quantity}</span>
+                  <div className={`${overlayChipClass} absolute top-1.5 sm:top-2 left-1.5 sm:left-2 text-cyan-300`}>
+                    x{item.quantity}
                   </div>
                 )}
                 {dlcStatus && (
-                  <div className={`absolute bottom-1.5 sm:bottom-2 left-1.5 sm:left-2 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg text-xs font-semibold ${
+                  <div className={`absolute bottom-1.5 sm:bottom-2 left-1.5 sm:left-2 text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-lg ${
                     dlcStatus.type === 'expired' 
-                      ? 'bg-red-500/80 text-white' 
+                      ? 'bg-red-500/70 text-white' 
                       : dlcStatus.type === 'soon'
-                      ? 'bg-yellow-500/80 text-white'
-                      : 'bg-green-500/80 text-white'
+                      ? 'bg-yellow-500/70 text-white'
+                      : 'bg-green-500/70 text-white'
                   }`}>
                     {dlcStatus.type === 'expired' 
                       ? `Expiré ${dlcStatus.days}j`
@@ -608,7 +1004,7 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
                   </div>
                 )}
                 {item.category && (
-                  <div className="absolute top-1.5 sm:top-2 left-1.5 sm:left-2 glass-icon px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg text-xs text-cyan-400 font-medium">
+                  <div className={`${overlayChipClass} absolute top-1.5 sm:top-2 left-1.5 sm:left-2 text-cyan-200 font-medium`}>
                     {item.category.split(' ')[0]}
                   </div>
                 )}
@@ -617,10 +1013,10 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
                     e.stopPropagation();
                     handleRemove(item.id);
                   }}
-                  className="absolute bottom-1.5 sm:bottom-2 right-1.5 sm:right-2 glass-error p-1 sm:p-1.5 rounded-lg hover:bg-red-500/30 transition-all"
+                  className="absolute bottom-1.5 sm:bottom-2 right-1.5 sm:right-2 rounded-lg border border-white/10 bg-black/30 p-1 sm:p-1.5 text-red-300 transition hover:border-red-400/50 hover:text-red-200"
                   aria-label="Retirer du frigo"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -708,7 +1104,7 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
     return (
       <div
         key={item.id}
-        className="glass-product rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer touch-feedback shadow-lg"
+        className="rounded-2xl overflow-hidden border border-white/5 bg-white/[0.035] backdrop-blur-sm transition-all duration-300 hover:border-cyan-400/40 cursor-pointer touch-feedback"
         onClick={() => onProductSelect(item.product)}
       >
         <div className="flex flex-col sm:flex-row">
@@ -728,8 +1124,8 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
               </div>
             )}
             {item.quantity && item.quantity > 1 && (
-              <div className="absolute top-2 left-2 glass-icon px-2 py-1 rounded-lg">
-                <span className="text-xs font-semibold text-cyan-400">x{item.quantity}</span>
+              <div className={`${overlayChipClass} absolute top-2 left-2 text-cyan-300`}>
+                x{item.quantity}
               </div>
             )}
             {dlcStatus && (
@@ -767,10 +1163,10 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
                     e.stopPropagation();
                     handleRemove(item.id);
                   }}
-                  className="glass-error p-2 rounded-lg hover:bg-red-500/30 transition-all flex-shrink-0"
+                  className="rounded-lg border border-white/10 bg-black/30 p-2 text-red-300 transition hover:border-red-400/50 hover:text-red-100 flex-shrink-0"
                   aria-label="Retirer du frigo"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -779,7 +1175,7 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
               {/* Métadonnées */}
               <div className="flex flex-wrap items-center gap-3 mb-3">
                 {item.category && (
-                  <div className="glass-icon px-2 py-1 rounded-lg text-xs text-cyan-400 font-medium">
+                  <div className={`${overlayChipClass} text-cyan-200 font-medium`}>
                     {item.category}
                   </div>
                 )}

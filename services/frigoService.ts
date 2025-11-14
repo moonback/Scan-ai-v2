@@ -143,6 +143,17 @@ export const frigoService = {
     }
   },
 
+  // Remplacer tous les produits du frigo (import de données)
+  setAll(items: FrigoItem[]): boolean {
+    try {
+      localStorage.setItem(FRIGO_STORAGE_KEY, JSON.stringify(items));
+      return true;
+    } catch (error) {
+      console.error('Erreur lors de l\'import des données du frigo:', error);
+      return false;
+    }
+  },
+
   // Mettre à jour la quantité d'un produit
   updateQuantity(id: string, quantity: number): boolean {
     try {
