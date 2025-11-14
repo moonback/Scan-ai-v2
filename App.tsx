@@ -203,25 +203,40 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col font-sans bg-[var(--app-bg)] text-slate-900 overflow-hidden">
+    <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-[var(--app-bg)] font-sans text-slate-900">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-40 left-1/2 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-gradient-to-br from-[#c7d2fe] via-[#e0e7ff] to-transparent opacity-70 blur-[140px]" />
+        <div className="hero-spotlight absolute bottom-[-140px] right-[-80px] h-[420px] w-[420px] opacity-60 blur-[160px]" />
+      </div>
+
       <DLCNotifications />
-      <Header 
-        title={getHeaderTitle()} 
-        showBack={view !== View.Scanner}
-        onBack={view === View.Product ? handleScanAnother : view === View.Chat ? handleBackToProduct : view === View.Frigo ? handleScanAnother : undefined}
-        showFrigo={view !== View.Frigo}
-        onFrigoClick={handleFrigoClick}
-        frigoCount={frigoCount}
-      />
-      <main className="flex-1 overflow-hidden mb-16 md:mb-0">
-        {renderContent()}
-      </main>
+
+      <div className="relative z-10 flex flex-1 flex-col">
+        <div className="px-2 sm:px-6">
+          <Header 
+            title={getHeaderTitle()} 
+            showBack={view !== View.Scanner}
+            onBack={view === View.Product ? handleScanAnother : view === View.Chat ? handleBackToProduct : view === View.Frigo ? handleScanAnother : undefined}
+            showFrigo={view !== View.Frigo}
+            onFrigoClick={handleFrigoClick}
+            frigoCount={frigoCount}
+          />
+        </div>
+
+        <main className="flex-1 overflow-hidden px-2 pb-20 pt-3 sm:px-6 md:pb-10">
+          <div className="relative mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-[22px] border border-white/10 bg-white/80 shadow-[0_30px_70px_rgba(15,23,42,0.15)] backdrop-blur-[28px] sm:rounded-[32px]">
+            {renderContent()}
+          </div>
+        </main>
+      </div>
+
       <BottomNav 
         currentView={view}
         onViewChange={handleBottomNavChange}
         frigoCount={frigoCount}
         hasProduct={!!product}
       />
+
       {showAddToFrigoModal && product && (
         <AddToFrigoModal
           product={product}

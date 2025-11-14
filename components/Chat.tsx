@@ -96,119 +96,131 @@ const Chat: React.FC<ChatProps> = ({ product, onBack }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[var(--app-bg)]">
-      <div className="flex items-center p-3 sm:p-4 glass-header border-b border-white/10 safe-area-top">
-        <button 
-          onClick={onBack} 
-          className="mr-3 p-2.5 rounded-xl hover:bg-slate-100 active:bg-slate-50 transition-all duration-200 group touch-feedback min-w-[48px] min-h-[48px]"
-          aria-label="Retour"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-300 group-hover:text-[#2563eb] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <img 
-          src={product.image_url} 
-          alt={product.product_name} 
-          className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover mr-3 border-2 border-white/20 shadow-lg"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/56/374151/9CA3AF?text=?';
-          }}
-        />
-        <div className="flex-1 min-w-0">
-          <h2 className="text-base sm:text-lg font-semibold truncate text-slate-900">{product.product_name}</h2>
-          <p className="text-xs sm:text-sm text-gray-400 truncate">Assistant IA</p>
+    <div className="flex h-full flex-col bg-transparent">
+      <div className="safe-area-top px-2.5 pt-2.5 sm:px-6 sm:pt-3">
+        <div className="glass-card flex items-center gap-3 rounded-[26px] border border-white/30 bg-white/85 px-3 py-2 sm:rounded-[28px] sm:px-4 sm:py-3">
+          <button
+            onClick={onBack}
+            className="group flex h-10 w-10 items-center justify-center rounded-2xl border border-white/50 bg-white/80 text-slate-500 transition hover:text-[var(--accent)] sm:h-11 sm:w-11"
+            aria-label="Retour"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <img
+            src={product.image_url}
+            alt={product.product_name}
+            className="h-12 w-12 rounded-2xl object-cover shadow-inner sm:h-14 sm:w-14"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/64/edf2ff/94a3b8?text=?';
+            }}
+          />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Assistant IA</p>
+            <h2 className="truncate text-lg font-semibold text-slate-900 sm:text-xl">{product.product_name}</h2>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 sm:space-y-4 bg-transparent smooth-scroll">
-        {messages.map((msg, index) => (
-          <div 
-            key={index} 
-            className={`flex items-end gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
-          >
-            {msg.role === 'model' && (
-              <div className="w-7 h-7 rounded-full glass-icon flex items-center justify-center flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-              </div>
-            )}
-            <div className={`max-w-[85%] sm:max-w-xs md:max-w-md p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-lg transform hover:scale-[1.02] transition-all ${
-              msg.role === 'user' 
-                ? 'glass-message-user text-white rounded-br-sm' 
-                : 'glass-message text-slate-900 rounded-bl-sm'
-            }`}>
-              <p className="whitespace-pre-wrap leading-relaxed text-sm sm:text-base">{msg.text}</p>
-              {msg.role === 'model' && (
-                <div className="mt-2 flex items-center justify-between gap-2 pt-2 border-t border-white/10">
-                  <SpeakerIcon text={msg.text}/>
-                  {msg.sources && msg.sources.length > 0 && (
-                    <div className="flex-1 text-xs text-gray-400">
-                      <h4 className="font-semibold text-gray-300 mb-0.5">Sources:</h4>
-                      <ul className="space-y-0.5">
-                        {msg.sources.map((source, i) => source.web && (
-                          <li key={i}>
-                            <a 
-                              href={source.web.uri} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="text-[#2563eb] hover:text-[#60a5fa] hover:underline transition-colors flex items-center gap-1"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                              </svg>
-                              {source.web.title}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
+      <div className="smooth-scroll flex-1 overflow-y-auto px-2.5 py-3.5 sm:px-6">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 sm:gap-4">
+          {messages.map((msg, index) => {
+            const isUser = msg.role === 'user';
+            return (
+              <div
+                key={index}
+                className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} animate-fade-in`}
+              >
+                {!isUser && (
+                  <div className="mr-3 hidden h-9 w-9 items-center justify-center rounded-2xl bg-white/80 shadow-sm sm:flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </div>
+                )}
+                <div
+                  className={`max-w-[86%] rounded-[26px] px-4 py-3 text-sm shadow-[0_18px_40px_rgba(15,23,42,0.12)] sm:text-base ${
+                    isUser
+                      ? 'bg-gradient-to-br from-[#4f46e5] to-[#0ea5e9] text-white'
+                      : 'bg-white/90 text-slate-900'
+                  }`}
+                >
+                  <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                  {msg.role === 'model' && (
+                    <div className="mt-3 flex flex-col gap-2 border-t border-slate-200/60 pt-3 text-xs text-slate-500">
+                      <div className="flex items-center gap-2">
+                        <SpeakerIcon text={msg.text} />
+                        <span className="font-medium uppercase tracking-[0.3em] text-[var(--accent-dark)]">Audio</span>
+                      </div>
+                      {msg.sources && msg.sources.length > 0 && (
+                        <div>
+                          <p className="mb-1 font-semibold text-slate-600">Sources vérifiées</p>
+                          <ul className="space-y-1">
+                            {msg.sources.map((source, i) => source.web && (
+                              <li key={i}>
+                                <a
+                                  href={source.web.uri}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-[var(--accent)] hover:underline"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                  </svg>
+                                  {source.web.title}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
-            </div>
-            {msg.role === 'user' && (
-              <div className="w-7 h-7 rounded-full glass-input flex items-center justify-center flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                {isUser && (
+                  <div className="ml-3 hidden h-9 w-9 items-center justify-center rounded-2xl bg-white/80 shadow-sm sm:flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          {isLoading && (
+            <div className="flex items-start gap-2">
+              <div className="hidden h-8 w-8 items-center justify-center rounded-2xl bg-white/80 shadow-sm sm:flex">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
               </div>
-            )}
-          </div>
-        ))}
-        {isLoading && (
-          <div className="flex justify-start items-end gap-2">
-            <div className="w-7 h-7 rounded-full glass-icon flex items-center justify-center flex-shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
+              <div className="glass-card rounded-[26px] px-4 py-3 text-sm text-slate-500 shadow-lg">
+                <Loader />
+              </div>
             </div>
-            <div className="glass-message rounded-xl rounded-bl-sm p-3">
-              <Loader/>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
+          )}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-3 sm:p-4 glass-header border-t border-white/10 safe-area-bottom">
-        <div className="flex items-center glass-chat-input rounded-2xl sm:rounded-3xl focus-within:ring-2 focus-within:ring-[#2563eb]/30 transition-all px-2">
+      <form onSubmit={handleSubmit} className="safe-area-bottom px-2.5 pb-3.5 sm:px-6 sm:pb-4">
+        <div className="glass-chat-input flex items-center gap-2 rounded-[26px] border border-white/40 bg-white/80 px-2.5 py-1.5 shadow-lg focus-within:ring-2 focus-within:ring-[var(--accent-soft)] sm:rounded-[30px] sm:px-3 sm:py-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Posez une question..."
-            className="flex-1 bg-transparent p-3 sm:p-4 text-slate-900 placeholder-gray-400 focus:outline-none text-sm sm:text-base min-h-[48px]"
+            className="flex-1 bg-transparent px-2 py-2 text-sm text-slate-900 placeholder:text-slate-400 sm:text-base focus:outline-none"
             autoComplete="off"
           />
-          <button 
-            type="submit" 
-            disabled={!input.trim() || isLoading} 
-            className="m-1 p-3 sm:p-4 glass-button text-white rounded-xl sm:rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed touch-feedback min-w-[48px] min-h-[48px] flex items-center justify-center"
+          <button
+            type="submit"
+            disabled={!input.trim() || isLoading}
+            className="glass-button flex h-10 w-10 items-center justify-center rounded-2xl disabled:opacity-50 sm:h-11 sm:w-11"
             aria-label="Envoyer"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>
           </button>

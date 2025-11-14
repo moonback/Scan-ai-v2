@@ -61,55 +61,54 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, onViewChange, frigoC
   );
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-header border-t border-white/10 safe-area-bottom z-40">
-      <div className={`flex items-center px-3 pb-3 pt-2 ${
-        navItems.length === 2 ? 'justify-center gap-10' : 'justify-around'
-      }`}>
-        {navItems.map((item) => (
-          <button
-            key={item.view}
-            onClick={() => onViewChange(item.view)}
-            className={`
-              relative flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl
-              transition-all duration-200 touch-feedback min-w-[64px] flex-1 max-w-[120px] border border-transparent
-              ${currentView === item.view 
-                ? 'text-[#2563eb] border-white/10 bg-white/[0.03]'
-                : 'text-gray-400 hover:text-slate-900'
-              }
-            `}
-          >
-            {/* Active indicator */}
-            {currentView === item.view && (
-              <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-[#2563eb] to-[#38bdf8] rounded-full animate-fade-in" />
-            )}
-            
-            {/* Icon container */}
-            <div className={`
-              relative p-1.5 rounded-xl transition-all
-              ${currentView === item.view 
-                ? 'bg-[#2563eb]/15 text-[#2563eb]' 
-                : 'hover:bg-slate-100'
-              }
-            `}>
-              {item.icon}
-              
-              {/* Badge */}
-              {item.showBadge && item.badgeCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-gradient-to-r from-[#ff8f5c] to-[#ff5ca0] text-white text-[10px] font-bold rounded-full border-2 border-white shadow-lg animate-scale-in">
-                  {item.badgeCount > 99 ? '99+' : item.badgeCount}
-                </span>
+    <nav 
+      className="md:hidden fixed inset-x-0 bottom-1.5 z-40 flex justify-center px-2.5 safe-area-bottom sm:bottom-2 sm:px-3"
+      aria-label="Navigation principale"
+    >
+      <div className="floating-nav pointer-events-auto flex w-full max-w-xs items-center gap-1 rounded-2xl border border-white/20 px-2 py-1 shadow-[0_14px_32px_rgba(15,23,42,0.14)] sm:px-3 sm:py-1.5 bg-white/90 backdrop-blur-md">
+        {navItems.map((item) => {
+          const isActive = currentView === item.view;
+          return (
+            <button
+              key={item.view}
+              onClick={() => onViewChange(item.view)}
+              className={`
+                relative flex flex-1 flex-col items-center gap-0.5 rounded-xl px-0.5 py-0.5 text-[10px] font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 sm:px-1.5 sm:py-1 sm:text-xs touch-feedback
+                ${isActive ? 'text-[var(--accent)] scale-[1.05]' : 'text-slate-400 hover:text-slate-800'}
+              `}
+              aria-current={isActive ? 'page' : undefined}
+              aria-label={item.label}
+              tabIndex={0}
+              type="button"
+            >
+              {isActive && (
+                <span className="absolute -top-1 left-1/2 h-1.5 w-7 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#4f46e5] to-[#0ea5e9] opacity-90 sm:-top-1.5 sm:h-1.5 sm:w-10 transition-all duration-150" />
               )}
-            </div>
-            
-            {/* Label */}
-            <span className={`
-              text-xs font-medium transition-all
-              ${currentView === item.view ? 'font-semibold' : ''}
-            `}>
-              {item.label}
-            </span>
-          </button>
-        ))}
+              <span
+                className={`
+                  relative flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-150 sm:h-10 sm:w-10
+                  ${isActive
+                    ? 'border-transparent bg-gradient-to-br from-[#eef2ff] to-[#dbeafe] text-[var(--accent)] shadow-inner scale-[1.08]'
+                    : 'border-white/30 bg-white/60 text-slate-500'}
+                `}
+                tabIndex={-1}
+                aria-hidden="true"
+              >
+                {item.icon}
+                {item.showBadge && item.badgeCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full border border-white/70 bg-gradient-to-r from-[#fb7185] to-[#f472b6] px-1 text-[9px] font-bold text-white shadow-lg">
+                    {item.badgeCount > 99 ? '99+' : item.badgeCount}
+                  </span>
+                )}
+              </span>
+              <span
+                className={`transition-opacity duration-200 ${isActive ? 'opacity-100 font-bold' : 'opacity-50 font-normal'} select-none`}
+              >
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </nav>
   );

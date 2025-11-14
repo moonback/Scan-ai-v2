@@ -30,13 +30,13 @@ const NutriScore: React.FC<{ score: string }> = ({ score }) => {
 type SortOption = 'date' | 'name' | 'price' | 'dlc';
 type ViewMode = 'grid' | 'list';
 const subtleButtonClass =
-  'inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs sm:text-sm text-gray-300 transition-colors hover:border-[#2563eb]/40 hover:text-slate-900';
+  'inline-flex items-center gap-1.5 rounded-2xl border border-white/40 bg-white/70 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-600 transition hover:border-white/70 hover:text-[var(--accent)]';
 const primaryButtonClass =
-  'inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#1e3a8a] via-[#2563eb] to-[#38bdf8] px-3.5 py-2 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-[rgba(37,99,235,0.25)] hover:from-[#1d4ed8] hover:to-[#38bdf8]';
+  'inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-[#4f46e5] via-[#6366f1] to-[#0ea5e9] px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-[0_18px_40px_rgba(79,70,229,0.35)] hover:opacity-95';
 const iconPillClass =
-  'h-10 w-10 sm:h-11 sm:w-11 rounded-full border border-white/10 bg-transparent text-gray-300 flex items-center justify-center transition hover:border-[#2563eb]/40 hover:text-slate-900';
+  'h-10 w-10 sm:h-11 sm:w-11 rounded-2xl border border-white/40 bg-white/80 text-slate-500 flex items-center justify-center transition hover:-translate-y-0.5 hover:text-[var(--accent)]';
 const overlayChipClass =
-  'px-2 py-0.5 rounded-lg border border-white/15 bg-black/30 backdrop-blur text-[10px] font-semibold text-slate-900/90';
+  'px-2.5 py-1 rounded-xl border border-white/40 bg-white/90 text-[10px] font-semibold text-slate-600';
 
 const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange }) => {
   const [items, setItems] = useState<FrigoItem[]>([]);
@@ -465,42 +465,37 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
 
   if (items.length === 0) {
     return (
-      <div className="p-4 sm:p-6 bg-[var(--app-bg)] text-slate-900 overflow-y-auto h-full smooth-scroll safe-area-top safe-area-bottom">
+      <div className="h-full overflow-y-auto bg-transparent px-4 py-6 text-slate-900 smooth-scroll safe-area-top safe-area-bottom sm:px-6">
         {renderHiddenFileInput()}
-        <div className="max-w-2xl mx-auto flex flex-col items-center justify-center h-full text-center animate-fade-in">
-          <div className="w-28 h-28 sm:w-32 sm:h-32 glass-icon rounded-3xl flex items-center justify-center mb-6 shadow-2xl animate-pulse-slow">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 sm:h-20 sm:w-20 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center text-center animate-fade-in">
+          <div className="mb-6 flex h-28 w-28 items-center justify-center rounded-[32px] bg-white/80 shadow-[0_25px_60px_rgba(15,23,42,0.18)] sm:h-32 sm:w-32">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-[var(--accent)] sm:h-20 sm:w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-[#f8f8f2] via-[#2563eb] to-[#38bdf8] bg-clip-text text-transparent">
-            Votre Frigo est Vide
-          </h2>
-          <p className="text-gray-400 mb-8 text-base sm:text-lg max-w-md mx-auto leading-relaxed">
-            Scannez des produits et ajoutez-les à votre frigo virtuel pour les retrouver facilement !
+          <h2 className="mb-3 text-3xl font-semibold text-slate-900">Votre frigo est vide</h2>
+          <p className="mb-8 max-w-md text-base text-slate-500">
+            Scannez vos produits pour commencer à suivre vos stocks, vos prix et vos DLC en un clin d’œil.
           </p>
-          <div className="flex flex-col gap-3 w-full max-w-sm">
+          <div className="flex w-full max-w-sm flex-col gap-3">
             <button
               onClick={onBack}
-              className="glass-button text-white font-semibold py-4 sm:py-5 px-8 sm:px-10 rounded-xl sm:rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 text-base sm:text-lg touch-feedback min-h-[56px] shadow-xl"
+              className="glass-button flex items-center justify-center gap-3 rounded-2xl py-4 text-base font-semibold"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
               </svg>
-              Scanner un Produit
+              Scanner un produit
             </button>
             <button
               onClick={handleImportClick}
-              className="glass-input text-slate-900 font-semibold py-4 sm:py-5 px-6 rounded-xl sm:rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 text-base sm:text-lg touch-feedback min-h-[56px]"
+              className="rounded-2xl border border-white/40 bg-white/80 px-6 py-4 text-base font-semibold text-slate-700 transition hover:bg-white"
               disabled={isProcessingImport}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6M20 4l-6 6M4 20l6-6" />
-              </svg>
-              {isProcessingImport ? 'Import en cours...' : 'Importer mes données'}
+              {isProcessingImport ? 'Import en cours…' : 'Importer mes données'}
             </button>
             {dataMessage && (
-              <p className={`text-sm ${dataMessage.type === 'success' ? 'text-green-400' : 'text-red-400'}`}>
+              <p className={`text-sm ${dataMessage.type === 'success' ? 'text-green-500' : 'text-red-500'}`}>
                 {dataMessage.text}
               </p>
             )}
@@ -511,8 +506,8 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
   }
 
   return (
-    <div className="p-4 sm:p-6 bg-[var(--app-bg)] text-slate-900 overflow-y-auto h-full smooth-scroll safe-area-top safe-area-bottom">
-      <div className="max-w-7xl mx-auto">
+    <div className="h-full overflow-y-auto bg-transparent px-3 py-4 text-slate-900 smooth-scroll safe-area-top safe-area-bottom sm:px-6 sm:py-6">
+      <div className="mx-auto max-w-7xl">
         {renderHiddenFileInput()}
         {/* Alertes DLC */}
         {(expiredItems.length > 0 || expiringSoonItems.length > 0) && (
@@ -965,7 +960,7 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
     return (
       <div
         key={item.id}
-        className="rounded-2xl sm:rounded-3xl overflow-hidden border border-white/5 bg-white/[0.04] backdrop-blur-sm transition-all duration-300 hover:border-[#2563eb]/40 cursor-pointer touch-feedback"
+        className="rounded-[28px] overflow-hidden border border-white/30 bg-white/85 shadow-[0_25px_55px_rgba(15,23,42,0.12)] transition-all duration-300 hover:-translate-y-1 cursor-pointer touch-feedback"
         onClick={() => onProductSelect(item.product)}
       >
               <div className="relative">
@@ -1104,7 +1099,7 @@ const Frigo: React.FC<FrigoProps> = ({ onProductSelect, onBack, onFrigoChange })
     return (
       <div
         key={item.id}
-        className="rounded-2xl overflow-hidden border border-white/5 bg-white/[0.035] backdrop-blur-sm transition-all duration-300 hover:border-[#2563eb]/40 cursor-pointer touch-feedback"
+        className="rounded-[28px] overflow-hidden border border-white/30 bg-white/85 shadow-[0_25px_55px_rgba(15,23,42,0.12)] transition-all duration-300 hover:-translate-y-1 cursor-pointer touch-feedback"
         onClick={() => onProductSelect(item.product)}
       >
         <div className="flex flex-col sm:flex-row">

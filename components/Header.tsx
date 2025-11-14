@@ -35,25 +35,26 @@ const Header: React.FC<HeaderProps> = ({ title, showBack, onBack, showFrigo, onF
   }, [title, prevTitle]);
 
   return (
-    <header className={`
-      glass-header p-3 sm:p-4 sticky top-0 z-50 safe-area-top
-      transition-all duration-300
-      ${scrolled ? 'border-b border-white/10 shadow-[0_10px_25px_rgba(15,23,42,0.1)]' : 'border-b border-transparent'}
-    `}>
-      <div className="flex items-center justify-between relative max-w-5xl mx-auto px-2 sm:px-4">
-        {/* Bouton Retour */}
-        <div className="flex-shrink-0 w-12">
+    <header
+      className={`
+        glass-header safe-area-top sticky top-0 z-50 border-b border-white/10
+        transition-all duration-300
+        ${scrolled ? 'shadow-[0_20px_45px_rgba(15,23,42,0.15)]' : 'shadow-none'}
+      `}
+    >
+      <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-2 px-1 py-1.5 sm:px-2 sm:py-2">
+        <div className="flex min-w-[52px] justify-start">
           {showBack && onBack && (
             <button
               onClick={onBack}
-              className="p-2.5 sm:p-3 rounded-xl hover:bg-slate-100 active:bg-slate-50 transition-all duration-200 group touch-feedback min-w-[48px] min-h-[48px] animate-fade-in border border-transparent hover:border-white/10"
+              className="group flex h-10 w-10 items-center justify-center rounded-2xl border border-white/40 bg-white/80 text-slate-500 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-white/60 hover:text-[var(--accent)] focus-visible:outline-none sm:h-11 sm:w-11"
               aria-label="Retour"
             >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-6 w-6 text-slate-500 group-hover:text-[#2563eb] group-active:scale-90 transition-all" 
-                fill="none" 
-                viewBox="0 0 24 24" 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 transition-transform duration-150 group-active:-translate-x-0.5"
+                fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -62,35 +63,64 @@ const Header: React.FC<HeaderProps> = ({ title, showBack, onBack, showFrigo, onF
           )}
         </div>
 
-        {/* Titre Central */}
-        <div className="flex-1 flex items-center justify-center gap-2.5 sm:gap-3 overflow-hidden">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 glass-icon rounded-xl flex items-center justify-center shadow-lg animate-pulse-slow flex-shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+        <div className="flex flex-1 flex-col items-center gap-1 text-center">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div
+              className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#e0eeff] to-white shadow-inner border border-slate-200/80"
+              aria-label="Validé par IA"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 text-[var(--accent)] drop-shadow"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="9"
+                  stroke="currentColor"
+                  strokeWidth={1.8}
+                  fill="#e0eaff"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.3}
+                  d="M9 12.5l2 2.2 4-4.7"
+                  stroke="#2563eb"
+                  fill="none"
+                />
+              </svg>
+            </div>
+            <h1
+              className={`
+                text-base font-semibold tracking-tight text-slate-900 sm:text-lg lg:text-xl
+                transition-all duration-300 select-none
+                ${animateTitle ? 'translate-y-1 opacity-0' : 'translate-y-0 opacity-100'}
+              `}
+              aria-live="polite"
+            >
+              {title}
+            </h1>
           </div>
-          <h1 className={`
-            text-base sm:text-lg lg:text-xl font-semibold text-slate-900 tracking-tight
-            truncate transition-all duration-300 uppercase
-            ${animateTitle ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'}
-          `}>
-            {title}
-          </h1>
         </div>
 
-        {/* Bouton Frigo (masqué sur mobile car dans bottom nav) */}
-        <div className="flex-shrink-0 w-12">
+        <div className="flex min-w-[52px] justify-end">
           {showFrigo && onFrigoClick && (
             <button
               onClick={onFrigoClick}
-              className="hidden md:flex p-2.5 sm:p-3 rounded-xl hover:bg-slate-100 active:bg-slate-50 transition-all duration-200 group relative touch-feedback min-w-[48px] min-h-[48px] items-center justify-center border border-transparent hover:border-white/10"
+              className="relative hidden h-10 w-auto items-center gap-2 rounded-2xl border border-white/40 bg-white/80 px-3 text-sm font-semibold text-slate-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-white/60 hover:text-[var(--accent)] md:inline-flex lg:h-11"
               aria-label="Mon Frigo"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-500 group-hover:text-[#2563eb] group-active:scale-90 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
+              <span className="hidden lg:inline">Frigo</span>
               {frigoCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-gradient-to-r from-[#2563eb] to-[#38bdf8] text-[#050505] text-xs font-bold rounded-full min-w-[24px] h-6 px-1.5 flex items-center justify-center shadow-lg border-2 border-[#050608] animate-scale-in">
+                <span className="absolute -top-2 -right-2 flex h-7 min-w-[26px] items-center justify-center rounded-full border border-white/60 bg-gradient-to-r from-[#4f46e5] to-[#0ea5e9] px-1 text-xs font-bold text-white shadow-lg">
                   {frigoCount > 99 ? '99+' : frigoCount}
                 </span>
               )}
@@ -99,8 +129,7 @@ const Header: React.FC<HeaderProps> = ({ title, showBack, onBack, showFrigo, onF
         </div>
       </div>
 
-      {/* Barre de progression decorative */}
-      <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-[#2563eb]/50 to-transparent" />
+      <div className="mx-auto mt-2 h-[2px] w-32 max-w-[45%] rounded-full bg-gradient-to-r from-transparent via-[#4f46e5] to-transparent" />
     </header>
   );
 };

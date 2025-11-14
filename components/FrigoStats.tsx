@@ -104,10 +104,10 @@ const FrigoStats: React.FC<FrigoStatsProps> = ({ items }) => {
   const maxValue = Math.max(...consumptionChart.map(d => Math.max(d.added, d.removed)), 1);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Coût total et statistiques principales */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="glass-card p-4 rounded-xl">
+        <div className="glass-card rounded-[24px] p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -120,7 +120,7 @@ const FrigoStats: React.FC<FrigoStatsProps> = ({ items }) => {
           )}
         </div>
 
-        <div className="glass-card p-4 rounded-xl">
+        <div className="glass-card rounded-[24px] p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -133,7 +133,7 @@ const FrigoStats: React.FC<FrigoStatsProps> = ({ items }) => {
       </div>
 
       {/* Graphique de consommation */}
-      <div className="glass-card p-4 rounded-xl">
+      <div className="glass-card rounded-[28px] p-5">
         <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -146,14 +146,14 @@ const FrigoStats: React.FC<FrigoStatsProps> = ({ items }) => {
               <div className="w-full flex flex-col items-center justify-end gap-0.5 h-24">
                 {/* Barre ajoutés */}
                 <div
-                  className="w-full bg-gradient-to-t from-green-500 to-green-400 rounded-t transition-all duration-300"
+                  className="w-full rounded-t bg-gradient-to-t from-[#4f46e5] to-[#7c3aed] transition-all duration-300"
                   style={{ height: `${(day.added / maxValue) * 100}%` }}
                   title={`${day.added} ajouté${day.added > 1 ? 's' : ''}`}
                 />
                 {/* Barre supprimés */}
                 {day.removed > 0 && (
                   <div
-                    className="w-full bg-gradient-to-t from-red-500 to-red-400 rounded-t transition-all duration-300"
+                    className="w-full rounded-t bg-gradient-to-t from-[#fb7185] to-[#f43f5e] transition-all duration-300"
                     style={{ height: `${(day.removed / maxValue) * 100}%` }}
                     title={`${day.removed} expiré${day.removed > 1 ? 's' : ''}`}
                   />
@@ -163,13 +163,13 @@ const FrigoStats: React.FC<FrigoStatsProps> = ({ items }) => {
             </div>
           ))}
         </div>
-        <div className="flex items-center justify-center gap-4 mt-3 pt-3 border-t border-white/10">
+        <div className="mt-3 flex items-center justify-center gap-4 border-t border-white/10 pt-3">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-green-500"></div>
+            <div className="h-3 w-3 rounded bg-[#4f46e5]" />
             <span className="text-xs text-gray-400">Ajoutés</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-red-500"></div>
+            <div className="h-3 w-3 rounded bg-[#f43f5e]" />
             <span className="text-xs text-gray-400">Expirés</span>
           </div>
         </div>
@@ -177,7 +177,7 @@ const FrigoStats: React.FC<FrigoStatsProps> = ({ items }) => {
 
       {/* Produits les plus consommés */}
       {mostConsumed.length > 0 && (
-        <div className="glass-card p-4 rounded-xl">
+        <div className="glass-card rounded-[28px] p-5">
           <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
