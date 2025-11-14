@@ -27,15 +27,15 @@ const SpeakerIcon: React.FC<{
   
   const Icon = () => {
     if(isGenerating) return (
-      <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#d4ff4c] border-t-transparent"></div>
+      <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#2563eb] border-t-transparent"></div>
     );
     if(isPlaying) return (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#d4ff4c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.858 12h.01" />
       </svg>
     );
     return (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 group-hover:text-[#d4ff4c] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 group-hover:text-[#2563eb] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.858 12h.01" />
       </svg>
     );
@@ -103,7 +103,7 @@ const Chat: React.FC<ChatProps> = ({ product, onBack }) => {
           className="mr-3 p-2.5 rounded-xl hover:bg-slate-100 active:bg-slate-50 transition-all duration-200 group touch-feedback min-w-[48px] min-h-[48px]"
           aria-label="Retour"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-300 group-hover:text-[#d4ff4c] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-300 group-hover:text-[#2563eb] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
@@ -129,7 +129,7 @@ const Chat: React.FC<ChatProps> = ({ product, onBack }) => {
           >
             {msg.role === 'model' && (
               <div className="w-7 h-7 rounded-full glass-icon flex items-center justify-center flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#d4ff4c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
               </div>
@@ -153,7 +153,7 @@ const Chat: React.FC<ChatProps> = ({ product, onBack }) => {
                               href={source.web.uri} 
                               target="_blank" 
                               rel="noopener noreferrer" 
-                              className="text-[#d4ff4c] hover:text-[#c2ff6e] hover:underline transition-colors flex items-center gap-1"
+                              className="text-[#2563eb] hover:text-[#60a5fa] hover:underline transition-colors flex items-center gap-1"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -180,7 +180,7 @@ const Chat: React.FC<ChatProps> = ({ product, onBack }) => {
         {isLoading && (
           <div className="flex justify-start items-end gap-2">
             <div className="w-7 h-7 rounded-full glass-icon flex items-center justify-center flex-shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#d4ff4c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
             </div>
@@ -193,7 +193,7 @@ const Chat: React.FC<ChatProps> = ({ product, onBack }) => {
       </div>
 
       <form onSubmit={handleSubmit} className="p-3 sm:p-4 glass-header border-t border-white/10 safe-area-bottom">
-        <div className="flex items-center glass-chat-input rounded-2xl sm:rounded-3xl focus-within:ring-2 focus-within:ring-[#d4ff4c]/30 transition-all px-2">
+        <div className="flex items-center glass-chat-input rounded-2xl sm:rounded-3xl focus-within:ring-2 focus-within:ring-[#2563eb]/30 transition-all px-2">
           <input
             type="text"
             value={input}

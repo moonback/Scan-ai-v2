@@ -33,7 +33,7 @@ const ProductExistsModal: React.FC<ProductExistsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-md animate-fade-in">
-      <div className="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto smooth-scroll animate-bounce-in shadow-2xl border-2 border-[#d4ff4c]/30">
+      <div className="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto smooth-scroll animate-bounce-in shadow-2xl border-2 border-[#2563eb]/30">
         {/* Header */}
         <div className="flex items-start justify-between mb-5">
           <div className="flex items-center gap-3">
@@ -86,7 +86,7 @@ const ProductExistsModal: React.FC<ProductExistsModalProps> = ({
                 </svg>
                 Quantité actuelle
               </span>
-              <span className="font-bold text-[#d4ff4c]">x{existingItem.quantity || 1}</span>
+              <span className="font-bold text-[#2563eb]">x{existingItem.quantity || 1}</span>
             </div>
 
             {existingItem.category && (
@@ -142,7 +142,7 @@ const ProductExistsModal: React.FC<ProductExistsModalProps> = ({
 
           <button
             onClick={onModify}
-            className="w-full glass-input text-slate-900 font-semibold py-4 px-6 rounded-xl sm:rounded-2xl hover:bg-slate-100 active:bg-slate-50 transition-all duration-200 flex items-center justify-center gap-2.5 text-sm sm:text-base touch-feedback min-h-[56px] border-2 border-[#d4ff4c]/30"
+            className="w-full glass-input text-slate-900 font-semibold py-4 px-6 rounded-xl sm:rounded-2xl hover:bg-slate-100 active:bg-slate-50 transition-all duration-200 flex items-center justify-center gap-2.5 text-sm sm:text-base touch-feedback min-h-[56px] border-2 border-[#2563eb]/30"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

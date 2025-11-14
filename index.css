@@ -17,9 +17,9 @@
     --text-primary: #0f172a;
     --text-secondary: #475569;
     --text-muted: #94a3b8;
-    --accent: #111827;
-    --accent-alt: #0ea5e9;
-    --accent-dark: #0b1220;
+    --accent: #2563eb;
+    --accent-alt: #38bdf8;
+    --accent-dark: #1e3a8a;
     --danger: #dc2626;
     --success: #059669;
   }
@@ -49,8 +49,8 @@
   }
 
   ::selection {
-    background: rgba(212, 255, 76, 0.4);
-    color: #050505;
+    background: rgba(37, 99, 235, 0.25);
+    color: #0f172a;
   }
 }
 
@@ -82,7 +82,7 @@
   }
 
   .glass-button {
-    background: linear-gradient(120deg, #111827, #0ea5e9);
+    background: linear-gradient(120deg, var(--accent-dark), var(--accent));
     color: #ffffff;
     border: 1px solid rgba(15, 23, 42, 0.12);
     box-shadow: 0 12px 25px rgba(15, 23, 42, 0.25);
@@ -121,7 +121,7 @@
   }
 
   .glass-message-user {
-    background: linear-gradient(120deg, #111827, #0ea5e9);
+    background: linear-gradient(120deg, var(--accent-dark), var(--accent));
     color: #ffffff;
     border: 1px solid rgba(15, 23, 42, 0.12);
   }

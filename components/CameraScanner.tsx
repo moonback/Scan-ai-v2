@@ -92,15 +92,15 @@ const CameraScanner: React.FC<CameraScannerProps> = ({ onDetected, onClose }) =>
               {/* Scan Frame */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative">
-                  <div className="w-64 h-40 sm:w-80 sm:h-48 border-2 border-[#d4ff4c] rounded-2xl relative animate-glow">
+                  <div className="w-64 h-40 sm:w-80 sm:h-48 border-2 border-[#2563eb] rounded-2xl relative animate-glow">
                     {/* Corners */}
-                    <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-[#d4ff4c] rounded-tl-xl"></div>
-                    <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-[#d4ff4c] rounded-tr-xl"></div>
-                    <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-[#d4ff4c] rounded-bl-xl"></div>
-                    <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-[#d4ff4c] rounded-br-xl"></div>
+                    <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-[#2563eb] rounded-tl-xl"></div>
+                    <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-[#2563eb] rounded-tr-xl"></div>
+                    <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-[#2563eb] rounded-bl-xl"></div>
+                    <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-[#2563eb] rounded-br-xl"></div>
                     
                     {/* Scan Line */}
-                    <div className="absolute inset-x-0 top-1/2 h-0.5 bg-gradient-to-r from-transparent via-[#d4ff4c] to-transparent animate-pulse"></div>
+                    <div className="absolute inset-x-0 top-1/2 h-0.5 bg-gradient-to-r from-transparent via-[#2563eb] to-transparent animate-pulse"></div>
                   </div>
                   
                   <p className="text-center text-slate-900 text-sm sm:text-base mt-6 px-4">

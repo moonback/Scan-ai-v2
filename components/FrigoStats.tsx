@@ -135,7 +135,7 @@ const FrigoStats: React.FC<FrigoStatsProps> = ({ items }) => {
       {/* Graphique de consommation */}
       <div className="glass-card p-4 rounded-xl">
         <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#d4ff4c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
           Consommation (7 jours)
@@ -179,7 +179,7 @@ const FrigoStats: React.FC<FrigoStatsProps> = ({ items }) => {
       {mostConsumed.length > 0 && (
         <div className="glass-card p-4 rounded-xl">
           <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#d4ff4c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
             Produits les plus consommés
@@ -188,14 +188,14 @@ const FrigoStats: React.FC<FrigoStatsProps> = ({ items }) => {
             {mostConsumed.map((product, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-[#d4ff4c] via-[#68ff9a] to-[#32d2a1] flex items-center justify-center text-slate-900 text-xs font-bold">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-[#2563eb] via-[#38bdf8] to-[#0ea5e9] flex items-center justify-center text-slate-900 text-xs font-bold">
                     {index + 1}
                   </div>
                   <span className="text-sm text-slate-900 truncate">{product.name}</span>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span className="text-xs text-gray-400">{product.count}x</span>
-                  <span className="text-sm font-semibold text-[#d4ff4c]">{product.totalQuantity}</span>
+                  <span className="text-sm font-semibold text-[#2563eb]">{product.totalQuantity}</span>
                 </div>
               </div>
             ))}

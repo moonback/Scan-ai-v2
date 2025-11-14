@@ -73,21 +73,21 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentView, onViewChange, frigoC
               relative flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl
               transition-all duration-200 touch-feedback min-w-[64px] flex-1 max-w-[120px] border border-transparent
               ${currentView === item.view 
-                ? 'text-[#d4ff4c] border-white/10 bg-white/[0.03]'
+                ? 'text-[#2563eb] border-white/10 bg-white/[0.03]'
                 : 'text-gray-400 hover:text-slate-900'
               }
             `}
           >
             {/* Active indicator */}
             {currentView === item.view && (
-              <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-[#d4ff4c] to-[#68ff9a] rounded-full animate-fade-in" />
+              <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-[#2563eb] to-[#38bdf8] rounded-full animate-fade-in" />
             )}
             
             {/* Icon container */}
             <div className={`
               relative p-1.5 rounded-xl transition-all
               ${currentView === item.view 
-                ? 'bg-[#d4ff4c]/15 text-[#d4ff4c]' 
+                ? 'bg-[#2563eb]/15 text-[#2563eb]' 
                 : 'hover:bg-slate-100'
               }
             `}>

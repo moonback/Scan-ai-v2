@@ -77,11 +77,11 @@ const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ item, onClose }) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-md animate-fade-in">
-      <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-5 w-full max-w-2xl max-h-[90vh] overflow-y-auto smooth-scroll animate-bounce-in shadow-2xl border-2 border-[#d4ff4c]/20">
+      <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-5 w-full max-w-2xl max-h-[90vh] overflow-y-auto smooth-scroll animate-bounce-in shadow-2xl border-2 border-[#2563eb]/20">
         {/* Header */}
         <div className="flex items-start justify-between mb-4 sm:mb-5">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#d4ff4c] via-[#68ff9a] to-[#32d2a1] flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2563eb] via-[#38bdf8] to-[#0ea5e9] flex items-center justify-center shadow-lg">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
@@ -149,14 +149,14 @@ const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ item, onClose }) 
                 )}
               </div>
 
-              <div className="glass-input rounded-xl p-3 text-center border-2 border-[#d4ff4c]/25">
+              <div className="glass-input rounded-xl p-3 text-center border-2 border-[#2563eb]/25">
                 <div className="flex items-center justify-center gap-1 mb-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#d4ff4c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                   </svg>
                   <span className="text-xs text-gray-400">Moy</span>
                 </div>
-                <p className="text-lg font-bold text-[#d4ff4c]">
+                <p className="text-lg font-bold text-[#2563eb]">
                   {averagePrice.toFixed(2)} €
                 </p>
                 <p className="text-[10px] text-gray-500 mt-0.5">{allEntries.length} achats</p>
@@ -181,7 +181,7 @@ const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ item, onClose }) 
             {/* Timeline */}
             <div className="space-y-3">
               <h4 className="text-sm font-semibold text-gray-300 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#d4ff4c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Historique des Achats
@@ -200,7 +200,7 @@ const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ item, onClose }) 
                       key={index}
                       className={`
                         glass-input rounded-xl p-3 border-2 transition-all animate-fade-in
-                        ${isLatest ? 'border-[#d4ff4c]/40 bg-[#d4ff4c]/10' : 'border-white/5'}
+                        ${isLatest ? 'border-[#2563eb]/40 bg-[#2563eb]/10' : 'border-white/5'}
                         ${isLowest ? 'border-green-500/30 bg-green-500/5' : ''}
                         ${isHighest ? 'border-red-500/30 bg-red-500/5' : ''}
                       `}
@@ -213,7 +213,7 @@ const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ item, onClose }) 
                               {entry.price.toFixed(2)} €
                             </p>
                             {isLatest && (
-                              <span className="px-2 py-0.5 bg-[#d4ff4c]/15 text-[#d4ff4c] text-[10px] font-bold rounded-full">
+                              <span className="px-2 py-0.5 bg-[#2563eb]/15 text-[#2563eb] text-[10px] font-bold rounded-full">
                                 ACTUEL
                               </span>
                             )}

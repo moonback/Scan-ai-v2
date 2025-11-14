@@ -51,7 +51,7 @@ const Header: React.FC<HeaderProps> = ({ title, showBack, onBack, showFrigo, onF
             >
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
-                className="h-6 w-6 text-slate-500 group-hover:text-[#d4ff4c] group-active:scale-90 transition-all" 
+                className="h-6 w-6 text-slate-500 group-hover:text-[#2563eb] group-active:scale-90 transition-all" 
                 fill="none" 
                 viewBox="0 0 24 24" 
                 stroke="currentColor"
@@ -65,7 +65,7 @@ const Header: React.FC<HeaderProps> = ({ title, showBack, onBack, showFrigo, onF
         {/* Titre Central */}
         <div className="flex-1 flex items-center justify-center gap-2.5 sm:gap-3 overflow-hidden">
           <div className="w-9 h-9 sm:w-10 sm:h-10 glass-icon rounded-xl flex items-center justify-center shadow-lg animate-pulse-slow flex-shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-[#d4ff4c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
@@ -86,11 +86,11 @@ const Header: React.FC<HeaderProps> = ({ title, showBack, onBack, showFrigo, onF
               className="hidden md:flex p-2.5 sm:p-3 rounded-xl hover:bg-slate-100 active:bg-slate-50 transition-all duration-200 group relative touch-feedback min-w-[48px] min-h-[48px] items-center justify-center border border-transparent hover:border-white/10"
               aria-label="Mon Frigo"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-500 group-hover:text-[#d4ff4c] group-active:scale-90 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-500 group-hover:text-[#2563eb] group-active:scale-90 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
               {frigoCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-gradient-to-r from-[#d4ff4c] to-[#68ff9a] text-[#050505] text-xs font-bold rounded-full min-w-[24px] h-6 px-1.5 flex items-center justify-center shadow-lg border-2 border-[#050608] animate-scale-in">
+                <span className="absolute -top-0.5 -right-0.5 bg-gradient-to-r from-[#2563eb] to-[#38bdf8] text-[#050505] text-xs font-bold rounded-full min-w-[24px] h-6 px-1.5 flex items-center justify-center shadow-lg border-2 border-[#050608] animate-scale-in">
                   {frigoCount > 99 ? '99+' : frigoCount}
                 </span>
               )}
@@ -100,7 +100,7 @@ const Header: React.FC<HeaderProps> = ({ title, showBack, onBack, showFrigo, onF
       </div>
 
       {/* Barre de progression decorative */}
-      <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-[#d4ff4c]/50 to-transparent" />
+      <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-[#2563eb]/50 to-transparent" />
     </header>
   );
 };
